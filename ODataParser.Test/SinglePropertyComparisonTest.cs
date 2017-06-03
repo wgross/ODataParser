@@ -58,5 +58,24 @@ namespace ODataParser.Test
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
         }
+
+        [Theory]
+        [InlineData("(Boolean eq true)")]
+        [InlineData("( Boolean eq true)")]
+        [InlineData("( Boolean eq true )")]
+        [InlineData("( (Boolean eq true) )")]
+        public void Filter_ignores_braces_for_compare(string toParse)
+        {
+            // ARRANGE
+            var data = new List<Data> {
+                new Data{ Boolean = true }
+            }.AsQueryable();
+
+            // ACT
+            var result = data.Where(new ComparisionExpression<Data>().MakeWhere(toParse));
+
+            // ASSERT
+            Assert.Same(data.ElementAt(0), result.Single());
+        }
     }
 }

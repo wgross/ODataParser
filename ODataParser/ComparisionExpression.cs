@@ -7,67 +7,48 @@ namespace ODataParser
 {
     public class ComparisionExpression<T>
     {
+        private readonly ParameterExpression predicateInputParamater = Expression.Parameter(typeof(T));
+
         public Expression<Func<T, bool>> MakeWhere(string whereClause)
         {
-            var parameterExpression = Expression.Parameter(typeof(T));
             return Expression.Lambda<Func<T, bool>>(
-                body: this.CreatePredicateBody(parameterExpression, whereClause),
-                parameters: new[] { parameterExpression }
+                body: this.PropertyCombinedOrSingle.Parse(whereClause),
+                parameters: new[] { this.predicateInputParamater }
             );
         }
 
-        public Expression CreatePredicateBody(ParameterExpression instanceOfT, string whereClause)
+        private Parser<Expression> PropertyCombinedOrSingle => PropertyCombined.Or(PropertyCompare);
+
+        private Parser<Expression> PropertyCombined => (from leftSide in PropertyCompare
+                                                        from combineOperator in Operators.And.Or(Operators.Or)
+                                                        from rightSide in PropertyCompare
+                                                        select Expression.MakeBinary(combineOperator, leftSide, rightSide));
+
+        private Expression PropertyCombinationExpression(Expression leftSide, ExpressionType combineOperator, Expression rightSide)
         {
-            return this.PredicateBodyParser()(instanceOfT).Parse(whereClause);
+            return Expression.MakeBinary(combineOperator, leftSide, rightSide);
         }
 
-        private Func<ParameterExpression, Parser<Expression>> PredicateBodyParser()
-        {
-            return (ParameterExpression instanceOfT) => (from propertyName in ScalarValues.PropertyName
-                                                         from comparisionOperator in Operators.ComparisionOperators
-                                                         from constantValue in ScalarValues.ContantOfAnyType
-                                                         select PropertyComparisionExpression(instanceOfT, propertyName, comparisionOperator, constantValue));
-        }
+        private Parser<Expression> PropertyCompareWithBraces => (from openingBrace in Operators.OpeningBrace
+                                                                 from embracedContent in PropertyCompare
+                                                                 from closingBrace in Operators.ClosingBrace
+                                                                 select embracedContent);
 
-        private Expression PropertyComparisionExpression(ParameterExpression instanceOfT, string propertyName, ExpressionType comparisionOperator, string constantComparisionValue)
+        private Parser<Expression> PropertyCompareWithoutBraces => (from property in ScalarValues.PropertyName.Select(PropertyOfInutParameter)
+                                                                    from comparisionOperator in Operators.ComparisionOperators
+                                                                    from constantValue in ScalarValues.ComparableScalarValue
+                                                                    select Expression.MakeBinary(comparisionOperator, property, constantValue));
+
+        private Parser<Expression> PropertyCompare => PropertyCompareWithBraces.Or(PropertyCompareWithoutBraces);
+
+        private Expression PropertyOfInutParameter(string propertyName)
         {
             var property = typeof(T).GetTypeInfo().GetProperty(propertyName);
             if (property == null)
             {
                 throw new InvalidOperationException($"Property {propertyName} doesn't exist in type {typeof(T)}");
             }
-
-            var propertyType = property.PropertyType;
-            var getPropertyValueExpr = Expression.Property(instanceOfT, propertyName);
-            var constantValueExpr = Expression.Constant(this.ConvertTo(propertyType, constantComparisionValue));
-
-            switch (comparisionOperator)
-            {
-                case ExpressionType.LessThan:
-                    return Expression.LessThan(getPropertyValueExpr, constantValueExpr);
-
-                case ExpressionType.Equal:
-                    return Expression.Equal(getPropertyValueExpr, constantValueExpr);
-
-                default: throw new NotImplementedException($"The comparision operation {comparisionOperator} is unknown");
-            }
-        }
-
-        private object ConvertTo(Type destinationType, string constantComparisionValue)
-        {
-            if (destinationType == typeof(int))
-            {
-                return int.Parse(constantComparisionValue);
-            }
-            else if (destinationType == typeof(string))
-            {
-                return constantComparisionValue;
-            }
-            else if (destinationType == typeof(bool))
-            {
-                return bool.Parse(constantComparisionValue);
-            }
-            else throw new InvalidOperationException($"Value type {destinationType.Name} is unknown");
+            return Expression.Property(this.predicateInputParamater, propertyName);
         }
     }
 }
