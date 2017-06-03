@@ -3,7 +3,7 @@ using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
-namespace ODataParser
+namespace Parser
 {
     public class WhereClause<T>
     {
@@ -68,9 +68,10 @@ namespace ODataParser
                                                               select Expression.MakeBinary(comparisionOperator, leftSide, rightSide));
 
         /// <summary>
-        /// A predicate is an expression comparing two values. A value might be a scalar value or an property value of T.
+        /// A predicate is an expression ora funcion comparing two values resultiong to tru or false.
+        /// A value might be a scalar value or an property value of T.
         /// </summary>
-        private Parser<Expression> Predicate => PredicateWithBraces.Or(PredicateWithoutBraces);
+        private Parser<Expression> Predicate => this.PredicateFunction.Or(this.PredicateWithBraces).Or(this.PredicateWithoutBraces);
 
         #endregion Parse comparision predicates: <predicate> ::= <left> <op> <right>
 
@@ -107,5 +108,25 @@ namespace ODataParser
         }
 
         #endregion Parse scalar values and properties of T for comprison
+
+        #region Parse function calls
+
+        private Parser<Expression> PredicateFunction => from fname in Functions.FunctionName
+                                                        from openingBrace in Parse.Char('(')
+                                                        from p1 in ScalarValueOrProperty
+                                                        from comma in Parse.Char(',')
+                                                        from p2 in ScalarValueOrProperty
+                                                        select MakeCallExpression(fname, p1, p2);
+
+        private Expression MakeCallExpression(string fname, Expression p1, Expression p2)
+        {
+            if (fname == "startswith")
+                return Expression.Call(p1, typeof(string).GetMethod("StartsWith", new[] { typeof(string) }), p2);
+            else if (fname == "endswith")
+                return Expression.Call(p1, typeof(string).GetMethod("EndsWith", new[] { typeof(string) }), p2);
+            throw new InvalidOperationException(fname);
+        }
+
+        #endregion Parse function calls
     }
 }

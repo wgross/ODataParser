@@ -1,7 +1,7 @@
 using Sprache;
 using Xunit;
 
-namespace ODataParser.Test
+namespace Parser.Test
 {
     public class ValuesParserTest
     {

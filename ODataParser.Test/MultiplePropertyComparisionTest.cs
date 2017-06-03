@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-namespace ODataParser.Test
+namespace Parser.Test
 {
     public class MultiplePropertyComparisionTest
     {

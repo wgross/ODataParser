@@ -1,7 +1,7 @@
 ﻿using Sprache;
 using System.Linq.Expressions;
 
-namespace ODataParser
+namespace Parser
 {
     public class Operators
     {
