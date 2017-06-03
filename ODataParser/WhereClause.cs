@@ -34,46 +34,45 @@ namespace Parser
         /// A combined predicate is made up from a left and a right predicate. In between there is a binary boolean
         /// operator.
         /// </summary>
-        private Parser<Expression> CombinedPredicate => (from leftSide in Predicate
-                                                         from combineOperator in Operators.BooleanOperators
-                                                         from rightSide in Predicate
-                                                         select Expression.MakeBinary(combineOperator, leftSide, rightSide));
-
-        private Expression PropertyCombinationExpression(Expression leftSide, ExpressionType combineOperator, Expression rightSide)
-        {
-            return Expression.MakeBinary(combineOperator, leftSide, rightSide);
-        }
+        private Parser<Expression> CombinedPredicate => from leftSide in Predicate
+                                                        from combineOperator in Operators.BooleanOperators
+                                                        from rightSide in Predicate
+                                                        select Expression.MakeBinary(combineOperator, leftSide, rightSide);
 
         #endregion Parse predicate combinations: <predicate> <and|or> <predicate>
 
-        #region Parse comparision predicates: <predicate> ::= <left> <op> <right>
+        #region Parse comparision predicates: <predicate> ::= <predicate function|predicate expression>
 
         /// <summary>
         /// A predicate without braces is a plain boolean term in brances like: (a eq 1).
         /// These braces are stripped and the contant is parsed as a predicate again.
         /// This removes redindant braces as well like: ((a eq 1)) -> a eq 1
         /// </summary>
-        private Parser<Expression> PredicateWithBraces => (from openingBrace in Operators.OpeningBrace
-                                                           from embracedContent in Predicate
-                                                           from closingBrace in Operators.ClosingBrace
-                                                           select embracedContent);
-
-        /// <summary>
-        /// A predicate without braces is just a plain boolean term like: a eq 1
-        /// In addition it is allowed to have a predicate in braces deliveriong a boolean value instead of a property or scalar value.
-        /// </summary>
-        private Parser<Expression> PredicateWithoutBraces => (from leftSide in this.ScalarValueOrProperty
-                                                              from comparisionOperator in Operators.ComparisionOperators
-                                                              from rightSide in this.ScalarValueOrProperty.Or(PredicateWithBraces)
-                                                              select Expression.MakeBinary(comparisionOperator, leftSide, rightSide));
+        private Parser<Expression> PredicateWithBraces => from openingBrace in Operators.OpeningBrace
+                                                          from embracedContent in Predicate
+                                                          from closingBrace in Operators.ClosingBrace
+                                                          select embracedContent;
 
         /// <summary>
         /// A predicate is an expression ora funcion comparing two values resultiong to tru or false.
         /// A value might be a scalar value or an property value of T.
         /// </summary>
-        private Parser<Expression> Predicate => this.PredicateFunction.Or(this.PredicateWithBraces).Or(this.PredicateWithoutBraces);
+        private Parser<Expression> Predicate => this.PredicateFunction.Or(this.PredicateWithBraces).Or(this.PredicateExpression);
 
-        #endregion Parse comparision predicates: <predicate> ::= <left> <op> <right>
+        #endregion Parse comparision predicates: <predicate> ::= <predicate function|predicate expression>
+
+        #region Parse predicate expressions: <predicate expression> ::= <property|value> <op> <property|value>
+
+        /// <summary>
+        /// A predicate expression is just a plain boolean term like: a eq 1
+        /// In addition it is allowed to have a predicate in braces deliveriong a boolean value instead of a property or scalar value.
+        /// </summary>
+        private Parser<Expression> PredicateExpression => from leftSide in this.ScalarValueOrProperty
+                                                          from comparisionOperator in Operators.ComparisionOperators
+                                                          from rightSide in this.ScalarValueOrProperty.Or(PredicateWithBraces)
+                                                          select Expression.MakeBinary(comparisionOperator, leftSide, rightSide);
+
+        #endregion Parse predicate expressions: <predicate expression> ::= <property|value> <op> <property|value>
 
         #region Parse scalar values and properties of T for comprison
 
@@ -109,7 +108,7 @@ namespace Parser
 
         #endregion Parse scalar values and properties of T for comprison
 
-        #region Parse function calls
+        #region Parse predicate functions: <function>(<property|value>,<property|value>)
 
         private Parser<Expression> PredicateFunction => from fname in Functions.FunctionName
                                                         from openingBrace in Parse.Char('(')
@@ -127,6 +126,6 @@ namespace Parser
             throw new InvalidOperationException(fname);
         }
 
-        #endregion Parse function calls
+        #endregion Parse predicate functions: <function>(<property|value>,<property|value>)
     }
 }
