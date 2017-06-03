@@ -53,23 +53,24 @@ namespace ODataParser
         /// These braces are stripped and the contant is parsed as a predicate again.
         /// This removes redindant braces as well like: ((a eq 1)) -> a eq 1
         /// </summary>
-        private Parser<Expression> PropertyCompareWithBraces => (from openingBrace in Operators.OpeningBrace
-                                                                 from embracedContent in Predicate
-                                                                 from closingBrace in Operators.ClosingBrace
-                                                                 select embracedContent);
+        private Parser<Expression> PredicateWithBraces => (from openingBrace in Operators.OpeningBrace
+                                                           from embracedContent in Predicate
+                                                           from closingBrace in Operators.ClosingBrace
+                                                           select embracedContent);
 
         /// <summary>
         /// A predicate without braces is just a plain boolean term like: a eq 1
+        /// In addition it is allowed to have a predicate in braces deliveriong a boolean value instead of a property or scalar value.
         /// </summary>
         private Parser<Expression> PredicateWithoutBraces => (from leftSide in this.ScalarValueOrProperty
                                                               from comparisionOperator in Operators.ComparisionOperators
-                                                              from rightSide in this.ScalarValueOrProperty
+                                                              from rightSide in this.ScalarValueOrProperty.Or(PredicateWithBraces)
                                                               select Expression.MakeBinary(comparisionOperator, leftSide, rightSide));
 
         /// <summary>
         /// A predicate is an expression comparing two values. A value might be a scalar value or an property value of T.
         /// </summary>
-        private Parser<Expression> Predicate => PropertyCompareWithBraces.Or(PredicateWithoutBraces);
+        private Parser<Expression> Predicate => PredicateWithBraces.Or(PredicateWithoutBraces);
 
         #endregion Parse comparision predicates: <predicate> ::= <left> <op> <right>
 
