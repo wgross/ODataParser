@@ -28,10 +28,7 @@ namespace Parser
         /// A combined predicate is made up from a left and a right predicate. In between there is a binary boolean
         /// operator.
         /// </summary>
-        private Parser<Expression> CombinedPredicate => from leftSide in Predicate
-                                                        from combineOperator in Operators.BooleanOperators
-                                                        from rightSide in Predicate
-                                                        select Expression.MakeBinary(combineOperator, leftSide, rightSide);
+        private Parser<Expression> CombinedPredicate => Parse.ChainOperator(Operators.BooleanOperators, this.Predicate, Expression.MakeBinary);
 
         #endregion Parse predicate combinations: <predicate> <and|or> <predicate>
 
@@ -61,10 +58,7 @@ namespace Parser
         /// A predicate expression is just a plain boolean term like: a eq 1
         /// In addition it is allowed to have a predicate in braces deliveriong a boolean value instead of a property or scalar value.
         /// </summary>
-        private Parser<Expression> PredicateExpression => from leftSide in this.ScalarValueOrProperty
-                                                          from comparisionOperator in Operators.ComparisionOperators
-                                                          from rightSide in this.ScalarValueOrProperty.Or(PredicateWithBraces)
-                                                          select Expression.MakeBinary(comparisionOperator, leftSide, rightSide);
+        private Parser<Expression> PredicateExpression => Parse.ChainOperator(Operators.ComparisionOperators, this.ScalarValueOrProperty, Expression.MakeBinary);
 
         #endregion Parse predicate expressions: <predicate expression> ::= <property|value> <op> <property|value>
 
@@ -93,7 +87,7 @@ namespace Parser
 
         #endregion Parse predicate functions: <function>(<property|value>,<property|value>)
 
-        #region Parse scalar values and properties of T for comprison
+        #region Parse scalar values and properties of T for comparison
 
         /// <summary>
         /// Psoosibe value if the left or the rights ides of a comparision are the scalar vlues parsed by the
@@ -125,6 +119,6 @@ namespace Parser
             return Expression.Property(this.predicateInputParamater, propertyName);
         }
 
-        #endregion Parse scalar values and properties of T for comprison
+        #endregion Parse scalar values and properties of T for comparison
     }
 }
