@@ -17,7 +17,7 @@ namespace Parser
         public Expression<Func<T, bool>> Of(string whereClause)
         {
             return Expression.Lambda<Func<T, bool>>(
-                body: this.CombinedPredicate.Or(this.Predicate).Parse(whereClause),
+                body: this.CombinedPredicate.Or(this.Predicate).End().Parse(whereClause),
                 parameters: new[] { this.predicateInputParamater }
             );
         }
@@ -74,6 +74,7 @@ namespace Parser
                                                               from p1 in ScalarValueOrProperty
                                                               from comma in Parse.Char(',')
                                                               from p2 in ScalarValueOrProperty
+                                                              from closingBrace in Parse.Char(')')
                                                               select CallExpression(fname, p1, p2);
 
         private MethodCallExpression CallExpression(string fname, Expression p1, Expression p2)
