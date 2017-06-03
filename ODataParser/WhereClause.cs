@@ -17,18 +17,12 @@ namespace Parser
         public Expression<Func<T, bool>> Of(string whereClause)
         {
             return Expression.Lambda<Func<T, bool>>(
-                body: this.CombinedPredicateOrSingle.Parse(whereClause),
+                body: this.CombinedPredicate.Or(this.Predicate).Parse(whereClause),
                 parameters: new[] { this.predicateInputParamater }
             );
         }
 
         #region Parse predicate combinations: <predicate> <and|or> <predicate>
-
-        /// <summary>
-        /// Try to parse a predicate combination. If it failes try with a single predicate.
-        /// This feels wrong.
-        /// </summary>
-        private Parser<Expression> CombinedPredicateOrSingle => CombinedPredicate.Or(Predicate);
 
         /// <summary>
         /// A combined predicate is made up from a left and a right predicate. In between there is a binary boolean
@@ -54,10 +48,10 @@ namespace Parser
                                                           select embracedContent;
 
         /// <summary>
-        /// A predicate is an expression ora funcion comparing two values resultiong to tru or false.
+        /// A predicate is an expression or a funcion comparing two values resultiong to tru or false.
         /// A value might be a scalar value or an property value of T.
         /// </summary>
-        private Parser<Expression> Predicate => this.PredicateFunction.Or(this.PredicateWithBraces).Or(this.PredicateExpression);
+        private Parser<Expression> Predicate => this.BinaryPredicateFunction.Or(this.PredicateWithBraces).Or(this.PredicateExpression);
 
         #endregion Parse comparision predicates: <predicate> ::= <predicate function|predicate expression>
 
@@ -73,6 +67,31 @@ namespace Parser
                                                           select Expression.MakeBinary(comparisionOperator, leftSide, rightSide);
 
         #endregion Parse predicate expressions: <predicate expression> ::= <property|value> <op> <property|value>
+
+        #region Parse predicate functions: <function>(<property|value>,<property|value>)
+
+        /// <summary>
+        /// A binary predicate function calcuates a boolen value from tow nput parameters. Bot parameter may be constant
+        /// value or a property of the macted instance ot T.
+        /// Currently the syntax is quite restrcited: no spaces are tolerated arount the functins tokens ( , )
+        /// </summary>
+        private Parser<Expression> BinaryPredicateFunction => from fname in Functions.FunctionName
+                                                              from openingBrace in Parse.Char('(')
+                                                              from p1 in ScalarValueOrProperty
+                                                              from comma in Parse.Char(',')
+                                                              from p2 in ScalarValueOrProperty
+                                                              select CallExpression(fname, p1, p2);
+
+        private MethodCallExpression CallExpression(string fname, Expression p1, Expression p2)
+        {
+            if (fname == "startswith")
+                return Expression.Call(p1, typeof(string).GetMethod(nameof(string.StartsWith), new[] { typeof(string) }), p2);
+            else if (fname == "endswith")
+                return Expression.Call(p1, typeof(string).GetMethod(nameof(string.EndsWith), new[] { typeof(string) }), p2);
+            throw new InvalidOperationException(fname);
+        }
+
+        #endregion Parse predicate functions: <function>(<property|value>,<property|value>)
 
         #region Parse scalar values and properties of T for comprison
 
@@ -107,25 +126,5 @@ namespace Parser
         }
 
         #endregion Parse scalar values and properties of T for comprison
-
-        #region Parse predicate functions: <function>(<property|value>,<property|value>)
-
-        private Parser<Expression> PredicateFunction => from fname in Functions.FunctionName
-                                                        from openingBrace in Parse.Char('(')
-                                                        from p1 in ScalarValueOrProperty
-                                                        from comma in Parse.Char(',')
-                                                        from p2 in ScalarValueOrProperty
-                                                        select MakeCallExpression(fname, p1, p2);
-
-        private Expression MakeCallExpression(string fname, Expression p1, Expression p2)
-        {
-            if (fname == "startswith")
-                return Expression.Call(p1, typeof(string).GetMethod("StartsWith", new[] { typeof(string) }), p2);
-            else if (fname == "endswith")
-                return Expression.Call(p1, typeof(string).GetMethod("EndsWith", new[] { typeof(string) }), p2);
-            throw new InvalidOperationException(fname);
-        }
-
-        #endregion Parse predicate functions: <function>(<property|value>,<property|value>)
     }
 }

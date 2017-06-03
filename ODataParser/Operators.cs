@@ -5,10 +5,7 @@ namespace Parser
 {
     public class Operators
     {
-        private static Parser<ExpressionType> Operator(string op, ExpressionType opType)
-        {
-            return Parse.String(op).Token().Return(opType);
-        }
+        private static Parser<ExpressionType> Operator(string op, ExpressionType opType) => Parse.String(op).Token().Return(opType);
 
         #region Value comparision operators
 
