@@ -10,17 +10,28 @@ namespace ODataParser
             return Parse.String(op).Token().Return(opType);
         }
 
+        #region Value comparision operators
+
         public static Parser<ExpressionType> LessThan = CompareOperator("lt", ExpressionType.LessThan);
 
         public static Parser<ExpressionType> Equal = CompareOperator("eq", ExpressionType.Equal);
 
         public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(Equal);
 
+        #endregion Value comparision operators
+
+        #region Boolean operators
+
         public static Parser<ExpressionType> And = CompareOperator("and", ExpressionType.And);
 
         public static Parser<ExpressionType> Or = CompareOperator("or", ExpressionType.Or);
 
+        public static Parser<ExpressionType> BooleanOperators = And.Or(Or);
+
+        #endregion Boolean operators
+
         public static Parser<char> OpeningBrace => from openingBrace in Parse.Char('(')
+
                                                    from trailingWS in Parse.Optional(Parse.WhiteSpace)
                                                    select openingBrace;
 

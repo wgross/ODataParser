@@ -40,7 +40,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere(parsable));
+            var result = data.Where(new WhereClause<Data>().Of(parsable));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -51,6 +51,7 @@ namespace ODataParser.Test
         [InlineData("(Integer eq 2) or Boolean eq true")]
         [InlineData("(Integer eq 2) or ( Boolean eq true )")]
         [InlineData("Integer eq 2 or (Boolean eq true)")]
+        //[InlineData("Boolean eq ( Integer eq 2)")]
         public void Filter_eq_Integer_or_Boolean(string parsable)
         {
             // ARRANGE
@@ -68,7 +69,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere(parsable));
+            var result = data.Where(new WhereClause<Data>().Of(parsable));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());

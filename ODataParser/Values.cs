@@ -45,6 +45,6 @@ namespace ODataParser
         /// <summary>
         /// All Scalar value packed together for convenience
         /// </summary>
-        public static Parser<Expression> ComparableScalarValue = SignedInteger.Or(TickedString).Or(Boolean);
+        public static Parser<Expression> All = SignedInteger.Or(TickedString).Or(Boolean);
     }
 }

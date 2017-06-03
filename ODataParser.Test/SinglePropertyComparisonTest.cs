@@ -23,7 +23,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere("Integer eq 2"));
+            var result = data.Where(new WhereClause<Data>().Of("Integer eq 2"));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -38,7 +38,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere("String eq 'test'"));
+            var result = data.Where(new WhereClause<Data>().Of("String eq 'test'"));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -53,7 +53,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere("Boolean eq true"));
+            var result = data.Where(new WhereClause<Data>().Of("Boolean eq true"));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -61,6 +61,7 @@ namespace ODataParser.Test
 
         [Theory]
         [InlineData("(Boolean eq true)")]
+        [InlineData("(true eq Boolean)")]
         [InlineData("( Boolean eq true)")]
         [InlineData("( Boolean eq true )")]
         [InlineData("( (Boolean eq true) )")]
@@ -72,7 +73,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new ComparisionExpression<Data>().MakeWhere(toParse));
+            var result = data.Where(new WhereClause<Data>().Of(toParse));
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
