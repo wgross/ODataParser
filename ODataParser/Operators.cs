@@ -5,33 +5,34 @@ namespace ODataParser
 {
     public class Operators
     {
-        private static Parser<ExpressionType> CompareOperator(string op, ExpressionType opType)
+        private static Parser<ExpressionType> Operator(string op, ExpressionType opType)
         {
             return Parse.String(op).Token().Return(opType);
         }
 
         #region Value comparision operators
 
-        public static Parser<ExpressionType> LessThan = CompareOperator("lt", ExpressionType.LessThan);
+        public static Parser<ExpressionType> LessThan = Operator("lt", ExpressionType.LessThan);
+        public static Parser<ExpressionType> LessThanOrEqual = Operator("le", ExpressionType.LessThanOrEqual);
+        public static Parser<ExpressionType> Equal = Operator("eq", ExpressionType.Equal);
+        public static Parser<ExpressionType> GreaterThanOrEqual = Operator("ge", ExpressionType.GreaterThanOrEqual);
+        public static Parser<ExpressionType> GreaterThan = Operator("gt", ExpressionType.GreaterThan);
 
-        public static Parser<ExpressionType> Equal = CompareOperator("eq", ExpressionType.Equal);
-
-        public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(Equal);
+        public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(LessThanOrEqual).Or(Equal).Or(GreaterThan).Or(GreaterThanOrEqual);
 
         #endregion Value comparision operators
 
         #region Boolean operators
 
-        public static Parser<ExpressionType> And = CompareOperator("and", ExpressionType.And);
+        public static Parser<ExpressionType> And = Operator("and", ExpressionType.And);
 
-        public static Parser<ExpressionType> Or = CompareOperator("or", ExpressionType.Or);
+        public static Parser<ExpressionType> Or = Operator("or", ExpressionType.Or);
 
         public static Parser<ExpressionType> BooleanOperators = And.Or(Or);
 
         #endregion Boolean operators
 
         public static Parser<char> OpeningBrace => from openingBrace in Parse.Char('(')
-
                                                    from trailingWS in Parse.Optional(Parse.WhiteSpace)
                                                    select openingBrace;
 
