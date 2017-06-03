@@ -40,6 +40,17 @@ namespace Parser.Test
         }
 
         [Theory]
+        [InlineData("ne")]
+        [InlineData(" ne")]
+        [InlineData(" ne ")]
+        [InlineData("ne ")]
+        public void Parse_ne(string parsable)
+        {
+            Assert.Equal(ExpressionType.NotEqual, Operators.NotEqual.Parse(parsable));
+            Assert.Equal(ExpressionType.NotEqual, Operators.ComparisionOperators.Parse(parsable));
+        }
+
+        [Theory]
         [InlineData("ge")]
         [InlineData(" ge")]
         [InlineData(" ge ")]
