@@ -65,16 +65,15 @@ namespace Parser
         #region Parse predicate functions: <function>(<property|value>,<property|value>)
 
         /// <summary>
-        /// A binary predicate function calcuates a boolen value from tow nput parameters. Bot parameter may be constant
+        /// A binary predicate function calcuates a boolen value from tow nput parameters. Both parameter may be constant
         /// value or a property of the macted instance ot T.
-        /// Currently the syntax is quite restrcited: no spaces are tolerated arount the functins tokens ( , )
         /// </summary>
         private Parser<Expression> BinaryPredicateFunction => from fname in Functions.FunctionName
-                                                              from openingBrace in Parse.Char('(')
+                                                              from openingBrace in Operators.OpeningBrace
                                                               from p1 in ScalarValueOrProperty
-                                                              from comma in Parse.Char(',')
+                                                              from comma in Operators.Comma
                                                               from p2 in ScalarValueOrProperty
-                                                              from closingBrace in Parse.Char(')')
+                                                              from closingBrace in Operators.ClosingBrace
                                                               select CallExpression(fname, p1, p2);
 
         private MethodCallExpression CallExpression(string fname, Expression p1, Expression p2)

@@ -30,12 +30,9 @@ namespace Parser
 
         #endregion Boolean operators
 
-        public static Parser<char> OpeningBrace => from openingBrace in Parse.Char('(')
-                                                   from trailingWS in Parse.Optional(Parse.WhiteSpace)
-                                                   select openingBrace;
+        public static Parser<char> OpeningBrace => Parse.Char('(').Token();
+        public static Parser<char> ClosingBrace => Parse.Char(')').Token();
+        public static Parser<char> Comma => Parse.Char(',').Token();
 
-        public static Parser<char> ClosingBrace => from leadingWs in Parse.Optional(Parse.WhiteSpace)
-                                                   from closingBrace in Parse.Char(')')
-                                                   select closingBrace;
     }
 }

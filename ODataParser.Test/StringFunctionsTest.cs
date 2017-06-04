@@ -16,6 +16,7 @@ namespace Parser.Test
         [Theory]
         [InlineData("startswith(String,'test')")]
         [InlineData("( startswith(String,'test') )")]
+        [InlineData("( startswith(String , 'test') )")]
         public void Parse_startswith(string parseable)
         {
             // ARRANGE
@@ -32,7 +33,9 @@ namespace Parser.Test
 
         [Theory]
         [InlineData("endswith(String,'value')")]
+        [InlineData("endswith( String,'value' )")]
         [InlineData("( endswith(String,'value') )")]
+        [InlineData("( endswith(String , 'value') )")]
         public void Parse_endswith(string parseable)
         {
             // ARRANGE
