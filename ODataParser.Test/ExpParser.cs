@@ -6,81 +6,85 @@ namespace ODataParser.Test
 {
     public class BooleanExpressionParser
     {
-        public static bool EvaluateConstant(string text) => ParseConstant(text).Compile().Invoke();
+        
+        
+        #region Parse boolean constants: <boolean constant> ::= <true|false>
 
-        public static Expression<Func<bool>> ParseConstant(string text) => LambdaConstant.Parse(text) as Expression<Func<bool>>;
+        private static Parser<Expression> True = Parse.String("true").Token().Return(Expression.Constant(true));
+        private static Parser<Expression> False = Parse.String("false").Token().Return(Expression.Constant(false));
+        private static Parser<Expression> BooleanConstant => True.XOr(False);
 
-        public static Parser<LambdaExpression> LambdaConstant => BooleanConstant.XOr(BooleanConstantInParenthesis).End().Select(body => Expression.Lambda<Func<bool>>(body));
+        private static Parser<Expression> BooleanConstantInParenthesis => from left in Parse.Char('(').Token()
+                                                                          from booleanConst in Parse.Ref(() => AnyBooleanConstant)
+                                                                          from right in Parse.Char(')').Token()
+                                                                          select booleanConst;
 
-        // ---
+        /// <summary>
+        /// A constant might in parenthesis or not.
+        /// </summary>
+        public static Parser<Expression> AnyBooleanConstant => BooleanConstantInParenthesis.XOr(BooleanConstant); // must be XOR
 
-        public static bool EvaluateExpresssion(string text) => ParseExpression(text).Compile().Invoke();
+        #endregion Parse boolean constants: <boolean constant> ::= <true|false>
 
-        public static Expression<Func<bool>> ParseExpression(string text) => LambdaExpression.Parse(text) as Expression<Func<bool>>;
+        #region Parse boolean unary expression <boolean unary expression> ::= not <boolean constant|boolean expression>
 
-        public static Parser<LambdaExpression> LambdaExpression => BooleanExpression.Or(BooleanExpressionInParenthesis).End().Select(body => Expression.Lambda<Func<bool>>(body));
+        private static Parser<ExpressionType> Not => Parse.String("not").Token().Return(ExpressionType.Not);
 
-        // ---
-
-        //#region Generalize boolean expressions and constants as values: boolean value ::= <boolean expression<boolean value>
-
-        // #endregion Generalize boolean expressions and constants as values: boolean value ::= <boolean expression<boolean value>
-
-        #region Generalize unary and binary expresssion <boolean expression> ::= <unary boolean expression|binary boolean expression>
-
-        public static Parser<Expression> BooleanExpressionInParenthesis => from lparen in Parse.Char('(')
-                                                                           from booleanExpression in BooleanExpression.XOr(BooleanExpressionInParenthesis)
-                                                                           from rparen in Parse.Char(')')
-                                                                           select booleanExpression;
-
-        public static Parser<Expression> BooleanExpression => UnaryBooleanExpression.XOr(BinaryBooleanExpression);
-
-        #endregion Generalize unary and binary expresssion <boolean expression> ::= <unary boolean expression|binary boolean expression>
-
-        #region Parse boolean unary expression <boolean unary expression> ::= not <BooleanExpression>
-
+        /// <summary>
+        /// An unary operator may have a constant or another expressions as a parameter
+        /// </summary>
         public static Parser<Expression> UnaryBooleanExpression => from not in Not
-                                                                   from expression in BooleanConstant.XOr(BooleanConstantInParenthesis)
-                                                                   select Expression.MakeUnary(ExpressionType.Not, expression, typeof(bool));
+                                                                   from value in AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)) // Ref: delay access to avoid circular dependency
+                                                                   select Expression.MakeUnary(ExpressionType.Not, value, typeof(bool));
 
-        public static Parser<ExpressionType> Not => Parse.String("not").Token().Return(ExpressionType.Not);
+        #endregion Parse boolean unary expression <boolean unary expression> ::= not <boolean constant|boolean expression>
 
-        #endregion Parse boolean unary expression <boolean unary expression> ::= not <BooleanExpression>
+        #region Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
-        #region Parse boolean binary expression <boolean unary expression> ::= <BooleanExpression> <and|or|xor> <BooleanExpression>
+        private static Parser<ExpressionType> And => Parse.String("and").Token().Return(ExpressionType.And);
+        private static Parser<ExpressionType> Or => Parse.String("or").Token().Return(ExpressionType.OrElse);
+        private static Parser<ExpressionType> XOr => Parse.String("xor").Token().Return(ExpressionType.ExclusiveOr);
 
-        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(BinaryBooleanOperator, BooleanConstant, Expression.MakeBinary);
         public static Parser<ExpressionType> BinaryBooleanOperator => And.XOr(Or).XOr(XOr);
-        public static Parser<ExpressionType> And => Parse.String("and").Token().Return(ExpressionType.And);
-        public static Parser<ExpressionType> Or => Parse.String("or").Token().Return(ExpressionType.OrElse);
-        public static Parser<ExpressionType> XOr => Parse.String("xor").Token().Return(ExpressionType.ExclusiveOr); // not supported in EF?!
 
-        #endregion Parse boolean binary expression <boolean unary expression> ::= <BooleanExpression> <and|or|xor> <BooleanExpression>
+        /// <summary>
+        /// A binary bolean expression receives a constant or another boolean expression as a parameter
+        /// </summary>
+        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(BinaryBooleanOperator, AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary);
 
-        #region Parse boolean constants: <boolean value> ::= <true|false>|(<true|false>)
+        #endregion Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
-        public static Parser<Expression> BooleanConstantInParenthesis => from lparen in Parse.Char('(')
-                                                                         from booleanConstan in BooleanConstant.XOr(BooleanConstantInParenthesis)
-                                                                         from rparen in Parse.Char(')')
-                                                                         select booleanConstan;
+        #region Generalize unary and binary boolean expression: <boolean expression> ::= <unary boolean expression|binary boolean expression>
 
-        public static Parser<Expression> BooleanConstant => True.XOr(False);
-        public static Parser<Expression> True = Parse.String("true").Token().Return(Expression.Constant(true));
-        public static Parser<Expression> False = Parse.String("false").Token().Return(Expression.Constant(false));
+        private static Parser<Expression> BooleanExpression => UnaryBooleanExpression.XOr(BinaryBooleanExpression);
 
-        #endregion Parse boolean constants: <boolean value> ::= <true|false>|(<true|false>)
+        private static Parser<Expression> BooleanExpressionInParenthesis => from left in Parse.Char('(').Token()
+                                                                            from booleanExpr in Parse.Ref(() => AnyBooleanExpression) // Ref: delay access to avoid circular dependency
+                                                                            from right in Parse.Char(')').Token()
+                                                                            select booleanExpr;
 
-        public static bool EvaluateValue(string text) => ParseValue(text).Compile().Invoke();
+        /// <summary>
+        /// A boolean expression might be in parenthesis or not.
+        /// </summary>
+        public static Parser<Expression> AnyBooleanExpression => BooleanExpressionInParenthesis.XOr(BooleanExpression); // must be XOR
 
-        public static Expression<Func<bool>> ParseValue(string text) => LambdaValue.Parse(text) as Expression<Func<bool>>;
+        #endregion Generalize unary and binary boolean expression: <boolean expression> ::= <unary boolean expression|binary boolean expression>
 
-        public static Parser<LambdaExpression> LambdaValue => BooleanValue.Or(BooleanValueInParenthesis).End().Select(body => Expression.Lambda<Func<bool>>(body));
+        /// <summary>
+        /// Parses the given boolean expression text and evaluates the result.
+        /// </summary>
+        /// <param name="text">bolle exprsssion text</param>
+        /// <returns></returns>
+        public static bool Evaluate(string text) => MakePredicate(text).Compile().Invoke();
 
-        public static Parser<Expression> BooleanValueInParenthesis => from lparen in Parse.Char('(')
-                                                                      from booleanValue in BooleanValue.Or(BooleanValueInParenthesis)
-                                                                      from rparen in Parse.Char(')')
-                                                                      select booleanValue;
+        private static Expression<Func<bool>> MakePredicate(string text) => ParsePredicate.Parse(text) as Expression<Func<bool>>;
 
-        public static Parser<Expression> BooleanValue = True.XOr(False).XOr(UnaryBooleanExpression).XOr(BinaryBooleanExpression).XOr(BooleanValueInParenthesis);
+        /// <summary>
+        /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
+        /// </summary>
+        private static Parser<LambdaExpression> ParsePredicate => AnyBooleanConstant.End()
+            .Or(AnyBooleanExpression.End())
+            .Or(Parse.ChainOperator(BinaryBooleanOperator, AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary))
+            .Select(body => Expression.Lambda<Func<bool>>(body));
     }
 }
