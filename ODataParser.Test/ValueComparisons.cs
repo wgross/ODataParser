@@ -28,7 +28,10 @@ namespace ODataParser.Test
         /// <summary>
         /// A boolean expression might be in parenthesis or not.
         /// </summary>
-        public static Parser<Expression> AnyComparisionExpression => ComparisionExpressionInParenthesis.XOr(ComparisionExpression); // must be XOR
+        /// <remarks>
+        /// Selectct can be XOr becaue they differ in openeing  parenthisis.
+        /// </remarks>
+        public static Parser<Expression> AnyComparisionExpression => ComparisionExpressionInParenthesis.XOr(ComparisionExpression).Token(); // must be XOR
 
         #endregion Parse comparison expression: <comp expression> ::= <value> <op> <value>
 
