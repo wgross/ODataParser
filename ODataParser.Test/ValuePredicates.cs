@@ -11,7 +11,7 @@ namespace ODataParser.Test
 
         //public static Parser<Expression> BooleanValue = ValueComparisons.AnyComparisionExpression
         //    .Or(Parse.ChainOperator(Operators.ComparisionOperators, Parse.Ref(() => ValueComparisons.AnyComparisionExpression), Expression.MakeBinary));
-        public static Parser<Expression> BooleanValue = ScalarValues.BooleanConstant.Or(ValueComparisons.ComparisionExpression).Or(Parse.LetterOrDigit.Many().Select(t => Expression.Constant(t)));
+        public static Parser<Expression> BooleanValue = ScalarValues.BooleanConstant.Or(Comparisions.ComparisionExpression).Or(Parse.LetterOrDigit.Many().Select(t => Expression.Constant(t)));
 
         #endregion Parse a boolean value : <boolean value> ::= <boolean constant|comparision expression>
 

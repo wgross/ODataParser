@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace ODataParser.Test
 {
-    public class ValueComparisons
+    public class Comparisions
     {
         #region Parse comparable values <compareable value> ::= <number|bool>
 
