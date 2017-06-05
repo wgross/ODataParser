@@ -20,10 +20,10 @@ namespace ODataParser.Test
         /// </summary>
         public static Parser<Expression> ComparisionExpression => Parse.ChainOperator(Operators.ComparisionOperators, CompareableValues.Or(Parse.Ref(() => AnyComparisionExpression)), Expression.MakeBinary);
 
-        private static Parser<Expression> ComparisionExpressionInParenthesis => from left in Parse.Char('(').Token()
-                                                                                from booleanExpr in Parse.Ref(() => AnyComparisionExpression) // Ref: delay access to avoid circular dependency
-                                                                                from right in Parse.Char(')').Token()
-                                                                                select booleanExpr;
+        public static Parser<Expression> ComparisionExpressionInParenthesis => from left in Parse.Char('(').Token()
+                                                                               from booleanExpr in Parse.Ref(() => AnyComparisionExpression) // Ref: delay access to avoid circular dependency
+                                                                               from right in Parse.Char(')').Token()
+                                                                               select booleanExpr;
 
         /// <summary>
         /// A boolean expression might be in parenthesis or not.
@@ -51,7 +51,19 @@ namespace ODataParser.Test
         /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
         /// </summary>
         private static Parser<LambdaExpression> ParsePredicate => AnyComparisionExpression.End()
-            .Or(Parse.ChainOperator(Operators.ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary))
+            .Or(Parse.ChainOperator(Operators.ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary).End())
             .Select(body => Expression.Lambda<Func<bool>>(body));
+    }
+
+    public static class ParserExtensions
+    {
+        public static T CallAsFunc<T>(this Parser<Expression> expressionParser, string text)
+        {
+            return ((Expression<Func<T>>)(expressionParser
+                .Select(body => Expression.Lambda<Func<T>>(body))
+                .Parse(text)))
+                    .Compile()
+                    .Invoke();
+        }
     }
 }

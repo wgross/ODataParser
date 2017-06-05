@@ -16,7 +16,7 @@ namespace ODataParser.Test
         [InlineData(true, "(false and true) or (true or false)")]
         public void Evaluate_binary_boolean_expressions_v(bool result, string parsable)
         {
-            Assert.Equal(result, BooleanExpressions.Evaluate(parsable));
+            Assert.Equal(result, new BooleanExpressions().Evaluate(parsable));
         }
 
         [Theory]
@@ -30,7 +30,7 @@ namespace ODataParser.Test
         [InlineData(false, "not ( (true or false))")]
         public void Evaluate_unary_boolean_expressions_v(bool result, string parsable)
         {
-            Assert.Equal(result, BooleanExpressions.Evaluate(parsable));
+            Assert.Equal(result, new BooleanExpressions().Evaluate(parsable));
         }
     }
 }

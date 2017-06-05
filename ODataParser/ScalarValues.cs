@@ -8,7 +8,7 @@ namespace Parser
     /// </summary>
     public class ScalarValues
     {
-        public static Parser<string> PropertyName = Parse.Letter.AtLeastOnce().Text().Token();
+        public static readonly Parser<string> String = Parse.Letter.AtLeastOnce().Text().Token();
 
         #region Parse JSONish number
 
@@ -31,39 +31,38 @@ namespace Parser
         /// <summary>
         /// A test is surrounded with tiocks ('). The text must not contains these.
         /// </summary>
-        public static Parser<Expression> TickedString = (from openingTick in Parse.Char('\'')
-                                                         from stringContent in Parse.CharExcept('\'').Many().Text()
-                                                         from closingTick in Parse.Char('\'')
-                                                         select Expression.Constant(stringContent));
-
-        /// <summary>
-        /// A boolean value is simply a constant text value of true or false.
-        /// </summary>
-        //public static Parser<Expression> Boolean = from parsedValue in Parse.String("true").Or(Parse.String("false")).Text()
-        //                                           select Expression.Constant(bool.Parse(parsedValue));
+        public static readonly Parser<ConstantExpression> StringInTicks = from openingTick in Parse.Char('\'')
+                                                                          from stringContent in Parse.CharExcept('\'').Many().Text()
+                                                                          from closingTick in Parse.Char('\'')
+                                                                          select Expression.Constant(stringContent);
 
         #region Parse boolean constants: <boolean constant> ::= <true|false>
 
-        private static Parser<ConstantExpression> True = Parse.String("true").Token().Return(Expression.Constant(true));
-        private static Parser<ConstantExpression> False = Parse.String("false").Token().Return(Expression.Constant(false));
+        private static readonly Parser<ConstantExpression> True = Parse.String("true").Token().Return(Expression.Constant(true));
+        private static readonly Parser<ConstantExpression> False = Parse.String("false").Token().Return(Expression.Constant(false));
 
-        public static Parser<ConstantExpression> BooleanConstant => True.XOr(False);
+        // Xor is possible because the leading and trailing whitespaces are removed before.
+        // afterwards the first char is significant
+        public static Parser<ConstantExpression> BooleanConstant => True.XOr(False).Token();
 
-        private static Parser<ConstantExpression> BooleanConstantInParenthesis => from left in Parse.Char('(').Token()
-                                                                                  from booleanConst in Parse.Ref(() => AnyBooleanConstant)
-                                                                                  from right in Parse.Char(')').Token()
-                                                                                  select booleanConst;
+        public static Parser<ConstantExpression> BooleanConstantInParenthesis => from left in Parse.Char('(').Token()
+                                                                                 from booleanConst in BooleanConstant.XOr(BooleanConstantInParenthesis).Token()
+                                                                                 from right in Parse.Char(')').Token()
+                                                                                 select booleanConst;
 
         /// <summary>
         /// A constant might in parenthesis or not.
         /// </summary>
-        public static Parser<ConstantExpression> AnyBooleanConstant => BooleanConstantInParenthesis.XOr(BooleanConstant); // must be XOR
+        /// <remarks>
+        /// A boolean constant might be on parenthesis for itself or not.
+        /// </remarks>
+        public static Parser<ConstantExpression> AnyBooleanConstant => BooleanConstant.XOr(BooleanConstantInParenthesis).Token(); // must be XOR
 
         #endregion Parse boolean constants: <boolean constant> ::= <true|false>
 
         /// <summary>
         /// All Scalar value packed together for convenience
         /// </summary>
-        public static Parser<Expression> All = Number.Or(TickedString).Or(AnyBooleanConstant);
+        public static Parser<Expression> All = Number.Or(StringInTicks).Or(AnyBooleanConstant);
     }
 }
