@@ -5,7 +5,7 @@ using System.Linq.Expressions;
 
 namespace ODataParser.Test
 {
-    public class BooleanExpressionParser
+    public class BooleanExpressions
     {
         #region Parse boolean unary expression <boolean unary expression> ::= not <boolean constant|boolean expression>
 

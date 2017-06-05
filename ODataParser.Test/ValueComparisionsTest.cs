@@ -2,7 +2,7 @@
 
 namespace ODataParser.Test
 {
-    public class ValueComparisionParserTest
+    public class ValueComparisionsTest
     {
         [Theory]
         [InlineData(true, "1 eq 1")]
@@ -10,7 +10,7 @@ namespace ODataParser.Test
         [InlineData(true, "true eq true")]
         public void Evaluate_comparsion(bool result, string parsable)
         {
-            Assert.Equal(result, ValueComparisonParser.Evaluate(parsable));
+            Assert.Equal(result, ValueComparisons.Evaluate(parsable));
         }
 
         [Theory()]
@@ -18,7 +18,7 @@ namespace ODataParser.Test
         [InlineData(true, "(1 eq 1) eq (2 gt 1)")]
         public void Evaluate_comparsion_recursive(bool result, string parsable)
         {
-            Assert.Equal(result, ValueComparisonParser.Evaluate(parsable));
+            Assert.Equal(result, ValueComparisons.Evaluate(parsable));
         }
     }
 }
