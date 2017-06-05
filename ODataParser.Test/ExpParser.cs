@@ -6,8 +6,6 @@ namespace ODataParser.Test
 {
     public class BooleanExpressionParser
     {
-        
-        
         #region Parse boolean constants: <boolean constant> ::= <true|false>
 
         private static Parser<Expression> True = Parse.String("true").Token().Return(Expression.Constant(true));
@@ -75,9 +73,11 @@ namespace ODataParser.Test
         /// </summary>
         /// <param name="text">bolle exprsssion text</param>
         /// <returns></returns>
-        public static bool Evaluate(string text) => MakePredicate(text).Compile().Invoke();
+        public static bool Evaluate(string text) => Evaluate((Expression<Func<bool>>)ParsePredicate.Parse(text));
 
-        private static Expression<Func<bool>> MakePredicate(string text) => ParsePredicate.Parse(text) as Expression<Func<bool>>;
+        private static bool Evaluate(Expression<Func<bool>> expression) => Evaluate(expression.Compile());
+
+        private static bool Evaluate(Func<bool> predicate) => predicate();
 
         /// <summary>
         /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
