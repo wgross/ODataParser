@@ -35,30 +35,17 @@ namespace ODataParser.Test
 
         #endregion Parse comparison expression: <comp expression> ::= <value> <op> <value>
 
-        #region Evaluate a comparison expresssion
+        #region Parses a text to the end as a chained set of comparision expressions
 
         /// <summary>
-        /// Parses the given boolean expression text and evaluates the result.
+        /// Parse the text to the end. It has to be a chian of value comparsions
         /// </summary>
-        /// <param name="text">bolle exprsssion text</param>
-        /// <returns></returns>
-        public static bool Evaluate(string text) => Evaluate((Expression<Func<bool>>)ParsePredicate.Parse(text));
+        public static Parser<Expression> Complete => Parse.ChainOperator(Operators.ComparisionOperators, AnyComparisionExpression, Expression.MakeBinary).End();
 
-        private static bool Evaluate(Expression<Func<bool>> expression) => Evaluate(expression.Compile());
-
-        private static bool Evaluate(Func<bool> predicate) => predicate();
-
-        #endregion Evaluate a comparison expresssion
-
-        /// <summary>
-        /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
-        /// </summary>
-        private static Parser<LambdaExpression> ParsePredicate => AnyComparisionExpression.End()
-            .Or(Parse.ChainOperator(Operators.ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary).End())
-            .Select(body => Expression.Lambda<Func<bool>>(body));
+        #endregion Parses a text to the end as a chained set of comparision expressions
     }
 
-    public static class ParserExtensions
+    public static class ExpressionParserExtensions
     {
         public static T CallAsFunc<T>(this Parser<Expression> expressionParser, string text)
         {
