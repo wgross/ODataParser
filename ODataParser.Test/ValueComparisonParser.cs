@@ -14,23 +14,11 @@ namespace ODataParser.Test
         #endregion Parse comparable values <compareable value> ::= <number|bool>
 
         #region Parse comparison expression: <comp expression> ::= <value> <op> <value>
-
-        private static Parser<ExpressionType> Operator(string op, ExpressionType opType) => Parse.String(op).Token().Return(opType);
-
-        public static Parser<ExpressionType> LessThan = Operator("lt", ExpressionType.LessThan);
-        public static Parser<ExpressionType> LessThanOrEqual = Operator("le", ExpressionType.LessThanOrEqual);
-        public static Parser<ExpressionType> Equal = Operator("eq", ExpressionType.Equal);
-        public static Parser<ExpressionType> NotEqual = Operator("ne", ExpressionType.NotEqual);
-        public static Parser<ExpressionType> GreaterThanOrEqual = Operator("ge", ExpressionType.GreaterThanOrEqual);
-        public static Parser<ExpressionType> GreaterThan = Operator("gt", ExpressionType.GreaterThan);
-
-        // must be Or because first char is not unique/significant enough
-        public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(LessThanOrEqual).Or(Equal).Or(NotEqual).Or(GreaterThan).Or(GreaterThanOrEqual);
-
+        
         /// <summary>
         /// A comparision expression receives a value or another comparision expression as a parameter
         /// </summary>
-        public static Parser<Expression> ComparisionExpression => Parse.ChainOperator(ComparisionOperators, CompareableValues.Or(Parse.Ref(() => AnyComparisionExpression)), Expression.MakeBinary);
+        public static Parser<Expression> ComparisionExpression => Parse.ChainOperator(Operators.ComparisionOperators, CompareableValues.Or(Parse.Ref(() => AnyComparisionExpression)), Expression.MakeBinary);
 
         private static Parser<Expression> ComparisionExpressionInParenthesis => from left in Parse.Char('(').Token()
                                                                                 from booleanExpr in Parse.Ref(() => AnyComparisionExpression) // Ref: delay access to avoid circular dependency
@@ -63,7 +51,7 @@ namespace ODataParser.Test
         /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
         /// </summary>
         private static Parser<LambdaExpression> ParsePredicate => AnyComparisionExpression.End()
-            .Or(Parse.ChainOperator(ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary))
+            .Or(Parse.ChainOperator(Operators.ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary))
             .Select(body => Expression.Lambda<Func<bool>>(body));
     }
 }

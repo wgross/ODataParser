@@ -9,12 +9,10 @@ namespace ODataParser.Test
     {
         #region Parse boolean unary expression <boolean unary expression> ::= not <boolean constant|boolean expression>
 
-        private static Parser<ExpressionType> Not => Parse.String("not").Token().Return(ExpressionType.Not);
-
         /// <summary>
         /// An unary operator may have a constant or another expressions as a parameter
         /// </summary>
-        public static Parser<Expression> UnaryBooleanExpression => from not in Not
+        public static Parser<Expression> UnaryBooleanExpression => from not in Operators.Not
                                                                    from value in ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)) // Ref: delay access to avoid circular dependency
                                                                    select Expression.MakeUnary(ExpressionType.Not, value, typeof(bool));
 
@@ -22,11 +20,7 @@ namespace ODataParser.Test
 
         #region Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
-        private static Parser<ExpressionType> And => Parse.String("and").Token().Return(ExpressionType.And);
-        private static Parser<ExpressionType> Or => Parse.String("or").Token().Return(ExpressionType.OrElse);
-        private static Parser<ExpressionType> XOr => Parse.String("xor").Token().Return(ExpressionType.ExclusiveOr);
-
-        public static Parser<ExpressionType> BinaryBooleanOperator => And.XOr(Or).XOr(XOr);
+        public static Parser<ExpressionType> BinaryBooleanOperator => Operators.And.XOr(Operators.Or).XOr(Operators.XOr);
 
         /// <summary>
         /// A binary bolean expression receives a constant or another boolean expression as a parameter

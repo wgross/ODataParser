@@ -79,7 +79,6 @@ namespace Parser.Test
         public void Parse_and(string parsable)
         {
             Assert.Equal(ExpressionType.And, Operators.And.Parse(parsable));
-            Assert.Equal(ExpressionType.And, Operators.BooleanOperators.Parse(parsable));
         }
 
         [Theory]
@@ -89,7 +88,24 @@ namespace Parser.Test
         public void Parse_or(string parsable)
         {
             Assert.Equal(ExpressionType.Or, Operators.Or.Parse(parsable));
-            Assert.Equal(ExpressionType.Or, Operators.BooleanOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("xor")]
+        [InlineData(" xor")]
+        [InlineData(" xor ")]
+        public void Parse_xor(string parsable)
+        {
+            Assert.Equal(ExpressionType.ExclusiveOr, Operators.XOr.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("not")]
+        [InlineData(" not")]
+        [InlineData(" not ")]
+        public void Parse_not(string parsable)
+        {
+            Assert.Equal(ExpressionType.Not, Operators.Not.Parse(parsable));
         }
     }
 }

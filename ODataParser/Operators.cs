@@ -23,16 +23,15 @@ namespace Parser
         #region Boolean operators
 
         public static Parser<ExpressionType> And = Operator("and", ExpressionType.And);
-
         public static Parser<ExpressionType> Or = Operator("or", ExpressionType.Or);
+        public static Parser<ExpressionType> XOr => Operator("xor", ExpressionType.ExclusiveOr);
+        public static Parser<ExpressionType> Not => Operator("not", ExpressionType.Not);
 
-        public static Parser<ExpressionType> BooleanOperators = And.Or(Or);
 
         #endregion Boolean operators
 
         public static Parser<char> OpeningBrace => Parse.Char('(').Token();
         public static Parser<char> ClosingBrace => Parse.Char(')').Token();
         public static Parser<char> Comma => Parse.Char(',').Token();
-
     }
 }
