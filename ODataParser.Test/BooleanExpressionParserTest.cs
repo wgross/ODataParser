@@ -4,18 +4,7 @@ namespace ODataParser.Test
 {
     public class BooleanExpressionParserTest
     {
-        [Theory]
-        [InlineData(true, "true")]
-        [InlineData(false, "false")]
-        [InlineData(true, "(true)")]
-        [InlineData(true, "( true )")]
-        [InlineData(true, "(( true ))")]
-        [InlineData(true, "( ( true ) )")]
-        public void Evaluate_boolean_expressions_v(bool result, string parsable)
-        {
-            Assert.Equal(result, BooleanExpressionParser.Evaluate(parsable));
-        }
-
+       
         [Theory]
         [InlineData(true, "true and true")]
         [InlineData(true, "(true and true)")]
