@@ -6,16 +6,22 @@ namespace Parser.Test
 {
     public class ScalerValuesTest
     {
+        #region String
+
         [Theory]
         [InlineData("name")]
         [InlineData(" name")]
         [InlineData("name ")]
-        public void Parser_recognizes_name(string parsable)
+        public void Parse_String(string parsable)
         {
             // ACT
             Assert.Equal("name", ScalarValues.String.Parse(parsable));
             //Assert.Equal("name", ScalarValues.PropertyName.EvaluatePredicate<string>(parsable));
         }
+
+        #endregion String
+
+        #region Number
 
         [Theory]
         [InlineData(1, "1")]
@@ -26,11 +32,15 @@ namespace Parser.Test
         [InlineData(-1, " -1")]
         [InlineData(-1, " -1 ")]
         [InlineData(-1, "-1 ")]
-        public void Parse_int_number(int result, string parsable)
+        public void Parse_int_Number(int result, string parsable)
         {
             // ACT
             Assert.Equal(result, ScalarValues.Number.CallAsFunc<int>(parsable));
         }
+
+        #endregion Number
+
+        #region BooleanConstant,BooleanConstantInParenthesis,AnyBooleanConstant
 
         [Theory]
         [InlineData(true, "true")]
@@ -63,12 +73,19 @@ namespace Parser.Test
             Assert.Equal(result, ScalarValues.AnyBooleanConstant.CallAsFunc<bool>(parsable));
         }
 
+        #endregion BooleanConstant,BooleanConstantInParenthesis,AnyBooleanConstant
+
+        #region StringInTicks
+
         [Theory]
         [InlineData("text", "'text'")]
         [InlineData(" text ", "' text '")]
-        public void Evaluate_string_in_ticks_expression(string result, string parsable)
+        [InlineData(" text ", " ' text ' ")]
+        public void Evaluate_StringInTicks(string result, string parsable)
         {
-            Assert.Equal(result, ScalarValues.StringInTicks.CallAsFunc<string>(parsable));
+            Assert.Equal(result, ScalarValues.StringConstant.CallAsFunc<string>(parsable));
         }
+
+        #endregion StringInTicks
     }
 }

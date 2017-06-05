@@ -29,12 +29,12 @@ namespace Parser
         #endregion Parse JSONish number
 
         /// <summary>
-        /// A test is surrounded with tiocks ('). The text must not contains these.
+        /// A string contant is surreounded by ticke ('). Leading and trailing spaces are ignored outside of teh ticked area.
         /// </summary>
-        public static readonly Parser<ConstantExpression> StringInTicks = from openingTick in Parse.Char('\'')
-                                                                          from stringContent in Parse.CharExcept('\'').Many().Text()
-                                                                          from closingTick in Parse.Char('\'')
-                                                                          select Expression.Constant(stringContent);
+        public static readonly Parser<ConstantExpression> StringConstant = (from openingTick in Parse.Char('\'')
+                                                                            from stringContent in Parse.CharExcept('\'').Many().Text()
+                                                                            from closingTick in Parse.Char('\'')
+                                                                            select Expression.Constant(stringContent)).Token();
 
         #region Parse boolean constants: <boolean constant> ::= <true|false>
 
@@ -63,6 +63,6 @@ namespace Parser
         /// <summary>
         /// All Scalar value packed together for convenience
         /// </summary>
-        public static Parser<Expression> All = Number.Or(StringInTicks).Or(AnyBooleanConstant);
+        public static Parser<Expression> All = Number.Or(StringConstant).Or(AnyBooleanConstant);
     }
 }
