@@ -20,12 +20,10 @@ namespace ODataParser.Test
 
         #region Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
-        public static Parser<ExpressionType> BinaryBooleanOperator => Operators.And.XOr(Operators.Or).XOr(Operators.XOr);
-
         /// <summary>
         /// A binary bolean expression receives a constant or another boolean expression as a parameter
         /// </summary>
-        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(BinaryBooleanOperator, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary);
+        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(Operators.BinaryBoolean, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary);
 
         #endregion Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
@@ -61,7 +59,7 @@ namespace ODataParser.Test
         /// </summary>
         private Parser<LambdaExpression> ParsePredicate => ScalarValues.AnyBooleanConstant.End()
             .Or(AnyBooleanExpression.End())
-            .Or(Parse.ChainOperator(BinaryBooleanOperator, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary).End())
+            .Or(Parse.ChainOperator(Operators.BinaryBoolean, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary).End())
             .Select(body => Expression.Lambda<Func<bool>>(body));
     }
 }

@@ -24,13 +24,13 @@ namespace Parser
 
         #region Parse predicate combinations: <predicate> <and|or> <predicate>
 
-        public static Parser<ExpressionType> BooleanOperators = Operators.And.Or(Operators.Or);
+        //public static Parser<ExpressionType> BooleanOperators = Operators.BinaryBoolean;
 
         /// <summary>
         /// A combined predicate is made up from a left and a right predicate. In between there is a binary boolean
         /// operator.
         /// </summary>
-        private Parser<Expression> CombinedPredicate => Parse.ChainOperator(BooleanOperators, this.Predicate, Expression.MakeBinary);
+        private Parser<Expression> CombinedPredicate => Parse.ChainOperator(Operators.BinaryBoolean, this.Predicate, Expression.MakeBinary);
 
         #endregion Parse predicate combinations: <predicate> <and|or> <predicate>
 

@@ -16,7 +16,14 @@ namespace Parser
         public static Parser<ExpressionType> GreaterThanOrEqual = Operator("ge", ExpressionType.GreaterThanOrEqual);
         public static Parser<ExpressionType> GreaterThan = Operator("gt", ExpressionType.GreaterThan);
 
-        public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(LessThanOrEqual).Or(Equal).Or(NotEqual).Or(GreaterThan).Or(GreaterThanOrEqual);
+        /// <summary>
+        /// All Avaliable value comparision operators
+        /// </summary>
+        /// <remarks>
+        /// XOr isn't possible here: the first char isn't unique in this operator set.
+        /// Leading and trailing spaces are removed.
+        /// </remarks>
+        public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(LessThanOrEqual).Or(Equal).Or(NotEqual).Or(GreaterThan).Or(GreaterThanOrEqual).Token();
 
         #endregion Value comparision operators
 
@@ -26,7 +33,7 @@ namespace Parser
         public static Parser<ExpressionType> Or = Operator("or", ExpressionType.Or);
         public static Parser<ExpressionType> XOr => Operator("xor", ExpressionType.ExclusiveOr);
         public static Parser<ExpressionType> Not => Operator("not", ExpressionType.Not);
-
+        public static Parser<ExpressionType> BinaryBoolean = And.XOr(Or).XOr(XOr).Token();
 
         #endregion Boolean operators
 

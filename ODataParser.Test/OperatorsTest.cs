@@ -79,6 +79,7 @@ namespace Parser.Test
         public void Parse_and(string parsable)
         {
             Assert.Equal(ExpressionType.And, Operators.And.Parse(parsable));
+            Assert.Equal(ExpressionType.And, Operators.BinaryBoolean.Parse(parsable));
         }
 
         [Theory]
@@ -88,6 +89,7 @@ namespace Parser.Test
         public void Parse_or(string parsable)
         {
             Assert.Equal(ExpressionType.Or, Operators.Or.Parse(parsable));
+            Assert.Equal(ExpressionType.Or, Operators.BinaryBoolean.Parse(parsable));
         }
 
         [Theory]
@@ -97,6 +99,7 @@ namespace Parser.Test
         public void Parse_xor(string parsable)
         {
             Assert.Equal(ExpressionType.ExclusiveOr, Operators.XOr.Parse(parsable));
+            Assert.Equal(ExpressionType.ExclusiveOr, Operators.BinaryBoolean.Parse(parsable));
         }
 
         [Theory]
