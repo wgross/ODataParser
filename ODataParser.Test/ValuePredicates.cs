@@ -23,7 +23,7 @@ namespace ODataParser.Test
         public static Parser<Expression> UnaryBooleanExpression => from not in Operators.Not
                                                                    from value in BooleanValue.Or(Parse.Ref(() => AnyBooleanExpression)) // Ref: delay access to avoid circular dependency
                                                                    select Expression.MakeUnary(ExpressionType.Not, Inspect(value), typeof(bool));
-        
+
         private static Expression Inspect(Expression unaryExpression)
         {
             return unaryExpression;
