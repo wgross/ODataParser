@@ -67,7 +67,7 @@ namespace ODataParser.Test
         /// </summary>
         private static Parser<LambdaExpression> ParsePredicate => ScalarValues.AnyBooleanConstant.End()
             .Or(AnyBooleanExpression.End())
-            .Or(Parse.ChainOperator(BinaryBooleanOperator, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary))
+            .Or(Parse.ChainOperator(BinaryBooleanOperator, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary).End())
             .Select(body => Expression.Lambda<Func<bool>>(body));
     }
 }

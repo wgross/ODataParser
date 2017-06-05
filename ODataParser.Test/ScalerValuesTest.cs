@@ -16,28 +16,6 @@ namespace Parser.Test
         }
 
         [Theory]
-        [InlineData("1")]
-        [InlineData(" 1")]
-        [InlineData(" 1 ")]
-        [InlineData("1 ")]
-        public void Parse_positive_int_number(string parsable)
-        {
-            // ACT
-            Assert.Equal("1", ScalarValues.Number.Parse(parsable));
-        }
-
-        [Theory]
-        [InlineData("-1")]
-        [InlineData(" -1")]
-        [InlineData(" -1 ")]
-        [InlineData("-1 ")]
-        public void Parse_negative_int_number(string parsable)
-        {
-            // ACT
-            Assert.Equal("-1", ScalarValues.Number.Parse(parsable));
-        }
-
-        [Theory]
         [InlineData(1, "1")]
         [InlineData(1, " 1")]
         [InlineData(1, " 1 ")]
@@ -49,7 +27,7 @@ namespace Parser.Test
         public void Parse_int_number(int result, string parsable)
         {
             // ACT
-            Assert.Equal(result, ScalarValues.Number_.Parse(parsable).Value);
+            Assert.Equal(result, ScalarValues.Number.Parse(parsable).Value);
         }
 
         [Theory]

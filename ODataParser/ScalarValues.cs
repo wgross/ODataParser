@@ -10,17 +10,13 @@ namespace Parser
     {
         public static Parser<string> PropertyName = Parse.Letter.AtLeastOnce().Text().Token();
 
-        public static Parser<string> Number = (from leading in Parse.Optional(Parse.WhiteSpace)
-                                               from op in Parse.Optional(Parse.Char('-'))
-                                               from number in Parse.Decimal.Token()
-                                               from trailing in Parse.Optional(Parse.WhiteSpace)
-                                               select (op.IsDefined ? "-" : "") + number);
+        #region Parse JSONish number
 
-        public static Parser<ConstantExpression> Number_ = from leading in Parse.Optional(Parse.WhiteSpace)
-                                                           from negative in Parse.Optional(Parse.Char('-'))
-                                                           from number in Parse.Decimal.Token()
-                                                           from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                           select SignedNumberExpression(negative, number);
+        public static Parser<ConstantExpression> Number = from leading in Parse.Optional(Parse.WhiteSpace)
+                                                          from negative in Parse.Optional(Parse.Char('-'))
+                                                          from number in Parse.Decimal.Token()
+                                                          from trailing in Parse.Optional(Parse.WhiteSpace)
+                                                          select SignedNumberExpression(negative, number);
 
         private static ConstantExpression SignedNumberExpression(IOption<char> negative, string signedNumber)
         {
@@ -30,17 +26,7 @@ namespace Parser
                 return Expression.Constant(int.Parse(signedNumber));
         }
 
-        public static Parser<ConstantExpression> SignedInteger = (from leading in Parse.Optional(Parse.WhiteSpace)
-                                                                  from negative in Parse.Optional(Parse.Char('-').Token())
-                                                                  from number in Parse.Number
-                                                                  from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                                  select SignedIntegerExpression(negative, number));
-
-        private static ConstantExpression SignedIntegerExpression(IOption<char> negative, string signedNumber)
-        {
-            // add more here: long/int, negative positive
-            return Expression.Constant(int.Parse(signedNumber));
-        }
+        #endregion Parse JSONish number
 
         /// <summary>
         /// A test is surrounded with tiocks ('). The text must not contains these.
@@ -60,7 +46,8 @@ namespace Parser
 
         private static Parser<ConstantExpression> True = Parse.String("true").Token().Return(Expression.Constant(true));
         private static Parser<ConstantExpression> False = Parse.String("false").Token().Return(Expression.Constant(false));
-        private static Parser<ConstantExpression> BooleanConstant => True.XOr(False);
+
+        public static Parser<ConstantExpression> BooleanConstant => True.XOr(False);
 
         private static Parser<ConstantExpression> BooleanConstantInParenthesis => from left in Parse.Char('(').Token()
                                                                                   from booleanConst in Parse.Ref(() => AnyBooleanConstant)
@@ -77,6 +64,6 @@ namespace Parser
         /// <summary>
         /// All Scalar value packed together for convenience
         /// </summary>
-        public static Parser<Expression> All = SignedInteger.Or(TickedString).Or(AnyBooleanConstant);
+        public static Parser<Expression> All = Number.Or(TickedString).Or(AnyBooleanConstant);
     }
 }

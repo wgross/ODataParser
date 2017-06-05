@@ -7,6 +7,12 @@ namespace ODataParser.Test
 {
     public class ValueComparisonParser
     {
+        #region Parse comparable values <compareable value> ::= <number|bool>
+
+        private static Parser<ConstantExpression> CompareableValues = ScalarValues.Number.XOr(ScalarValues.BooleanConstant);
+
+        #endregion Parse comparable values <compareable value> ::= <number|bool>
+
         #region Parse comparison expression: <comp expression> ::= <value> <op> <value>
 
         private static Parser<ExpressionType> Operator(string op, ExpressionType opType) => Parse.String(op).Token().Return(opType);
@@ -24,7 +30,7 @@ namespace ODataParser.Test
         /// <summary>
         /// A comparision expression receives a value or another comparision expression as a parameter
         /// </summary>
-        public static Parser<Expression> ComparisionExpression => Parse.ChainOperator(ComparisionOperators, ScalarValues.SignedInteger.Or(Parse.Ref(() => ComparisionExpression)), Expression.MakeBinary);
+        public static Parser<Expression> ComparisionExpression => Parse.ChainOperator(ComparisionOperators, CompareableValues.Or(Parse.Ref(() => AnyComparisionExpression)), Expression.MakeBinary);
 
         private static Parser<Expression> ComparisionExpressionInParenthesis => from left in Parse.Char('(').Token()
                                                                                 from booleanExpr in Parse.Ref(() => AnyComparisionExpression) // Ref: delay access to avoid circular dependency
@@ -56,6 +62,8 @@ namespace ODataParser.Test
         /// <summary>
         /// A prediate body may consist of just a constant, a single expression, or a set of expressions linked with a binary operator
         /// </summary>
-        private static Parser<LambdaExpression> ParsePredicate => AnyComparisionExpression.Select(body => Expression.Lambda<Func<bool>>(body));
+        private static Parser<LambdaExpression> ParsePredicate => AnyComparisionExpression.End()
+            .Or(Parse.ChainOperator(ComparisionOperators, Parse.Ref(() => AnyComparisionExpression), Expression.MakeBinary))
+            .Select(body => Expression.Lambda<Func<bool>>(body));
     }
 }
