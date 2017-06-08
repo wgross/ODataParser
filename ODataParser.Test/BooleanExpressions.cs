@@ -12,7 +12,7 @@ namespace ODataParser.Test
         /// An unary operator may have a constant or another expressions as a parameter
         /// </summary>
         public static Parser<Expression> UnaryBooleanExpression => from not in Operators.Not
-                                                                   from value in ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)) // Ref: delay access to avoid circular dependency
+                                                                   from value in ScalarValues.BooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)) // Ref: delay access to avoid circular dependency
                                                                    select Expression.MakeUnary(ExpressionType.Not, value, typeof(bool));
 
         #endregion Parse boolean unary expression <boolean unary expression> ::= not <boolean constant|boolean expression>
@@ -22,7 +22,7 @@ namespace ODataParser.Test
         /// <summary>
         /// A binary bolean expression receives a constant or another boolean expression as a parameter
         /// </summary>
-        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(Operators.BinaryBoolean, ScalarValues.AnyBooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary);
+        public static Parser<Expression> BinaryBooleanExpression => Parse.ChainOperator(Operators.BinaryBoolean, ScalarValues.BooleanConstant.Or(Parse.Ref(() => AnyBooleanExpression)), Expression.MakeBinary);
 
         #endregion Parse boolean binary expression <boolean binary expression> ::= <boolean constant|boolean expression> <and|or|xor> <boolean constant|boolean expression>
 
@@ -37,7 +37,7 @@ namespace ODataParser.Test
         public static Parser<Expression> BooleanExpression => UnaryBooleanExpression.XOr(BinaryBooleanExpression).Token();
 
         public static Parser<Expression> BooleanExpressionInParenthesis => from left in Parse.Char('(').Token()
-                                                                           from booleanExpr in Parse.Ref(() => AnyBooleanExpression) // Ref: delay access to avoid circular dependency
+                                                                           from booleanExpr in Parse.Ref(() => AnyBooleanExpression).Or(ScalarValues.BooleanConstant) // Ref: delay access to avoid circular dependency
                                                                            from right in Parse.Char(')').Token()
                                                                            select booleanExpr;
 
@@ -51,6 +51,6 @@ namespace ODataParser.Test
 
         #endregion Generalize unary and binary boolean expression: <boolean expression> ::= <unary boolean expression|binary boolean expression>
 
-        public static Parser<Expression> Complete => Parse.ChainOperator(Operators.BinaryBoolean, AnyBooleanExpression, Expression.MakeBinary).End();
+        public static Parser<Expression> Complete => Parse.ChainOperator(Operators.BinaryBoolean, AnyBooleanExpression.Or(ScalarValues.BooleanConstant), Expression.MakeBinary).End();
     }
 }

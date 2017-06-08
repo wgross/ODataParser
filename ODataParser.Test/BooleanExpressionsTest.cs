@@ -10,6 +10,7 @@ namespace ODataParser.Test
         [InlineData(false, "not true")]
         [InlineData(false, " not true ")]
         [InlineData(true, "not not true")]
+        [InlineData(false, "not true and true")]
         public void Parse_UnaryBooleanExpression(bool result, string parsable)
         {
             Assert.Equal(result, BooleanExpressions.UnaryBooleanExpression.CallAsFunc<bool>(parsable));
@@ -46,9 +47,10 @@ namespace ODataParser.Test
         }
 
         [Theory]
-        [InlineData(true, "not true or true")]
+        [InlineData(true, "(not true) or true")]
+        [InlineData(true, "not true xor true")]
         [InlineData(false, "not true and true")]
-        [InlineData(false, "not true or ( true and false ) and false")]
+        [InlineData(false, "(not (true or ((true and false) and false)))")]
         [InlineData(false, "false and (true or false)")]
         [InlineData(false, " (true or false) xor true")]
         public void Parse_Complete(bool result, string parsable)
