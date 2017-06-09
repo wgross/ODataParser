@@ -1,7 +1,7 @@
 ﻿using Sprache;
 using System.Linq.Expressions;
 
-namespace Parser
+namespace ODataParser
 {
     public class Operators
     {
@@ -26,6 +26,20 @@ namespace Parser
         public static Parser<ExpressionType> ComparisionOperators = LessThan.Or(LessThanOrEqual).Or(Equal).Or(NotEqual).Or(GreaterThan).Or(GreaterThanOrEqual).Token();
 
         #endregion Value comparision operators
+
+        #region Value arithmethic operators
+
+        public static Parser<ExpressionType> Add = Operator("add", ExpressionType.Add);
+        public static Parser<ExpressionType> Sub = Operator("sub", ExpressionType.Subtract);
+        public static Parser<ExpressionType> Mul = Operator("mul", ExpressionType.Multiply);
+        public static Parser<ExpressionType> Div = Operator("div", ExpressionType.Divide);
+        public static Parser<ExpressionType> Pow = Operator("pow", ExpressionType.Power);
+
+        public static Parser<ExpressionType> ArithmeticOperators = Add.XOr(Sub).XOr(Mul).XOr(Div).XOr(Pow).Token();
+        public static Parser<ExpressionType> AditiveArithmeticOperators = Add.XOr(Sub).Token();
+        public static Parser<ExpressionType> MultiplicativeArithmeticOperators = Mul.XOr(Div).Token();
+
+        #endregion Value arithmethic operators
 
         #region Boolean operators
 
