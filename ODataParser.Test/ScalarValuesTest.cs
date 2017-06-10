@@ -1,5 +1,6 @@
 using ODataParser.Test;
 using Sprache;
+using System;
 using Xunit;
 
 namespace Parser.Test
@@ -36,6 +37,74 @@ namespace Parser.Test
         {
             // ACT
             Assert.Equal(result, ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Equal(result, ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(result, ScalarValues.Number.CallAsFunc<decimal>(parsable));
+            Assert.Equal(result, ScalarValues.Number.CallAsFunc<float>(parsable));
+            Assert.Equal(result, ScalarValues.Number.CallAsFunc<double>(parsable));
+        }
+
+        [Fact]
+        public void Parse_Number_as_long_if_int_is_too_small()
+        {
+            // ARRANGE
+
+            long intMax_plus_1 = (((long)int.MaxValue) + 1);
+            string parsable = intMax_plus_1.ToString();
+
+            // ACT
+
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Equal(intMax_plus_1, ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(intMax_plus_1, ScalarValues.Number.CallAsFunc<decimal>(parsable));
+            Assert.Equal(intMax_plus_1, ScalarValues.Number.CallAsFunc<float>(parsable));
+            Assert.Equal(intMax_plus_1, ScalarValues.Number.CallAsFunc<double>(parsable));
+        }
+
+        [Fact]
+        public void Parse_negative_Number_as_long_if_int_is_too_small()
+        {
+            // ARRANGE
+
+            long intMin_min_1 = (((long)int.MinValue) - 1);
+            string parsable = intMin_min_1.ToString();
+
+            // ACT
+
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Equal(intMin_min_1, ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(intMin_min_1, ScalarValues.Number.CallAsFunc<decimal>(parsable));
+            Assert.Equal(intMin_min_1, ScalarValues.Number.CallAsFunc<float>(parsable));
+            Assert.Equal(intMin_min_1, ScalarValues.Number.CallAsFunc<double>(parsable));
+        }
+
+        [Fact]
+        public void Parse_Number_as_decimal_if_long_is_too_small()
+        {
+            // ARRANGE
+
+            decimal longMax_plus_1 = (((decimal)long.MaxValue) + 1);
+            string parsable = longMax_plus_1.ToString();
+
+            // ACT
+
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(longMax_plus_1, ScalarValues.Number.CallAsFunc<decimal>(parsable));
+        }
+
+        [Fact]
+        public void Parse_negative_Number_as_decimal_if_long_is_too_small()
+        {
+            // ARRANGE
+
+            decimal longMin_min_1 = (((decimal)long.MinValue) - 1);
+            string parsable = longMin_min_1.ToString();
+
+            // ACT
+
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Throws<OverflowException>(() => ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(longMin_min_1, ScalarValues.Number.CallAsFunc<decimal>(parsable));
         }
 
         #endregion Number

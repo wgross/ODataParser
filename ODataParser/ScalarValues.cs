@@ -20,10 +20,12 @@ namespace Parser
 
         private static ConstantExpression SignedNumberExpression(IOption<char> negative, string signedNumber)
         {
-            if (negative.IsDefined)
-                return Expression.Constant(int.Parse("-" + signedNumber));
-            else
-                return Expression.Constant(int.Parse(signedNumber));
+            var str = negative.IsDefined ? "-" + signedNumber : signedNumber;
+            if (int.TryParse(str, out var intValue))
+                return Expression.Constant(intValue);
+            else if (long.TryParse(str, out var longValue))
+                return Expression.Constant(longValue);
+            else return Expression.Constant(decimal.Parse(str));
         }
 
         #endregion Parse JSONish number

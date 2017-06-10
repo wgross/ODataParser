@@ -50,7 +50,7 @@ namespace ODataParser.Test
         public static T CallAsFunc<T>(this Parser<Expression> expressionParser, string text)
         {
             return ((Expression<Func<T>>)(expressionParser
-                .Select(body => Expression.Lambda<Func<T>>(body))
+                .Select(body => Expression.Lambda<Func<T>>(Expression.ConvertChecked(body,typeof(T))))
                 .Parse(text)))
                     .Compile()
                     .Invoke();
