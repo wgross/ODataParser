@@ -16,16 +16,17 @@ namespace Parser
         public static Parser<ConstantExpression> Number = from leading in Parse.Optional(Parse.WhiteSpace)
                                                           from negative in Parse.Optional(Parse.Char('-'))
                                                           from number in Parse.Optional(Parse.Number)
-                                                          from dot in Parse.Optional(Parse.Char('.'))
-                                                          from decimals in Parse.Optional(Parse.Number)
+                                                          from decimals in Parse.Optional(from dot in Parse.Char('.')
+                                                                                          from decimals in Parse.Number
+                                                                                          select decimals)
                                                           from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                          select SignedNumberExpression(negative, number, dot, decimals);
+                                                          select SignedNumberExpression(negative, number, decimals);
 
-        private static ConstantExpression SignedNumberExpression(IOption<char> negative, IOption<string> number, IOption<char> dot, IOption<string> decimals)
+        private static ConstantExpression SignedNumberExpression(IOption<char> negative, IOption<string> number, IOption<string> decimals)
         {
-            if (dot.IsDefined)
+            if (decimals.IsDefined)
             {
-                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number.IsDefined ? number.Get() : "0")}.{(decimals.IsDefined ? decimals.Get() : "0")}";
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number.IsDefined ? number.Get() : "0")}.{decimals.Get()}";
                 if (float.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var floatvalue))
                     return Expression.Constant(floatvalue);
                 else if (double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var doublevalue))
@@ -45,6 +46,8 @@ namespace Parser
 
         #endregion Parse JSONish number
 
+        #region Parse string constants: '<text>'
+
         /// <summary>
         /// A string contant is surreounded by ticke ('). Leading and trailing spaces are ignored outside of teh ticked area.
         /// </summary>
@@ -52,6 +55,8 @@ namespace Parser
                                                                             from stringContent in Parse.CharExcept('\'').Many().Text()
                                                                             from closingTick in Parse.Char('\'')
                                                                             select Expression.Constant(stringContent)).Token();
+
+        #endregion Parse string constants: '<text>'
 
         #region Parse boolean constants: <boolean constant> ::= <true|false>
 
