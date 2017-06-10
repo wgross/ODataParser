@@ -1,4 +1,5 @@
 ﻿using Sprache;
+using System.Globalization;
 using System.Linq.Expressions;
 
 namespace Parser
@@ -14,18 +15,32 @@ namespace Parser
 
         public static Parser<ConstantExpression> Number = from leading in Parse.Optional(Parse.WhiteSpace)
                                                           from negative in Parse.Optional(Parse.Char('-'))
-                                                          from number in Parse.Decimal.Token()
+                                                          from number in Parse.Optional(Parse.Number)
+                                                          from dot in Parse.Optional(Parse.Char('.'))
+                                                          from decimals in Parse.Optional(Parse.Number)
                                                           from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                          select SignedNumberExpression(negative, number);
+                                                          select SignedNumberExpression(negative, number, dot, decimals);
 
-        private static ConstantExpression SignedNumberExpression(IOption<char> negative, string signedNumber)
+        private static ConstantExpression SignedNumberExpression(IOption<char> negative, IOption<string> number, IOption<char> dot, IOption<string> decimals)
         {
-            var str = negative.IsDefined ? "-" + signedNumber : signedNumber;
-            if (int.TryParse(str, out var intValue))
-                return Expression.Constant(intValue);
-            else if (long.TryParse(str, out var longValue))
-                return Expression.Constant(longValue);
-            else return Expression.Constant(decimal.Parse(str));
+            if (dot.IsDefined)
+            {
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number.IsDefined ? number.Get() : "0")}.{(decimals.IsDefined ? decimals.Get() : "0")}";
+                if (float.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var floatvalue))
+                    return Expression.Constant(floatvalue);
+                else if (double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var doublevalue))
+                    return Expression.Constant(doublevalue);
+                return Expression.Constant(decimal.Parse(str, NumberStyles.Number, CultureInfo.InvariantCulture));
+            }
+            else
+            {
+                var str = negative.IsDefined ? "-" + number.Get() : number.Get();
+                if (int.TryParse(str, out var intValue))
+                    return Expression.Constant(intValue);
+                else if (long.TryParse(str, out var longValue))
+                    return Expression.Constant(longValue);
+                else return Expression.Constant(decimal.Parse(str));
+            }
         }
 
         #endregion Parse JSONish number

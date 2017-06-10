@@ -1,6 +1,7 @@
 using ODataParser.Test;
 using Sprache;
 using System;
+using System.Globalization;
 using Xunit;
 
 namespace Parser.Test
@@ -25,22 +26,77 @@ namespace Parser.Test
         #region Number
 
         [Theory]
-        [InlineData(1, "1")]
-        [InlineData(1, " 1")]
-        [InlineData(1, " 1 ")]
-        [InlineData(1, "1 ")]
-        [InlineData(-1, "-1")]
-        [InlineData(-1, " -1")]
-        [InlineData(-1, " -1 ")]
-        [InlineData(-1, "-1 ")]
-        public void Parse_int_Number(int result, string parsable)
+        [InlineData("1")]
+        [InlineData(" 1")]
+        [InlineData(" 1 ")]
+        [InlineData("1 ")]
+        [InlineData("-1")]
+        [InlineData(" -1")]
+        [InlineData(" -1 ")]
+        [InlineData("-1 ")]
+        public void Parse_int_Number(string parsable)
         {
             // ACT
-            Assert.Equal(result, ScalarValues.Number.CallAsFunc<int>(parsable));
-            Assert.Equal(result, ScalarValues.Number.CallAsFunc<long>(parsable));
-            Assert.Equal(result, ScalarValues.Number.CallAsFunc<decimal>(parsable));
-            Assert.Equal(result, ScalarValues.Number.CallAsFunc<float>(parsable));
-            Assert.Equal(result, ScalarValues.Number.CallAsFunc<double>(parsable));
+
+            Assert.Equal(int.Parse(parsable), ScalarValues.Number.CallAsFunc<int>(parsable));
+            Assert.Equal(long.Parse(parsable), ScalarValues.Number.CallAsFunc<long>(parsable));
+            Assert.Equal(float.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<float>(parsable));
+            Assert.Equal(double.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<double>(parsable));
+            Assert.Equal(decimal.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<decimal>(parsable));
+        }
+
+        [Theory]
+        [InlineData("1.1")]
+        [InlineData(" 1.1")]
+        [InlineData(" 1.1 ")]
+        [InlineData("1.1 ")]
+        [InlineData("-1.1")]
+        [InlineData(" -1.1")]
+        [InlineData(" -1.1 ")]
+        [InlineData("-1.1 ")]
+        public void Parse_float_Number(string parsable)
+        {
+            // ACT
+
+            Assert.Equal(float.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<float>(parsable));
+            //ugly rounding//Assert.Equal(double.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<double>(parsable));
+            Assert.Equal(decimal.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<decimal>(parsable));
+        }
+
+        [Theory]
+        [InlineData("1.")]
+        [InlineData(" 1.")]
+        [InlineData(" 1. ")]
+        [InlineData("1. ")]
+        [InlineData("-1.")]
+        [InlineData(" -1.")]
+        [InlineData(" -1. ")]
+        [InlineData("-1. ")]
+        public void Parse_float_Number_no_decimals(string parsable)
+        {
+            // ACT
+
+            Assert.Equal(float.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<float>(parsable));
+            //ugly rounding//Assert.Equal(double.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<double>(parsable));
+            Assert.Equal(decimal.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<decimal>(parsable));
+        }
+
+        [Theory]
+        [InlineData(".1")]
+        [InlineData(" .1")]
+        [InlineData(" .1 ")]
+        [InlineData(".1 ")]
+        [InlineData("-.1")]
+        [InlineData(" -.1")]
+        [InlineData(" -.1 ")]
+        [InlineData("-.1 ")]
+        public void Parse_float_Number_no_number(string parsable)
+        {
+            // ACT
+
+            Assert.Equal(float.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<float>(parsable));
+            //ugly rounding//Assert.Equal(double.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<double>(parsable));
+            Assert.Equal(decimal.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<decimal>(parsable));
         }
 
         [Fact]
