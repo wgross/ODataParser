@@ -25,7 +25,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClauseEx<Data>().Of(parseable));
+            var result = data.Where(parseable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -44,7 +44,7 @@ namespace ODataParser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClauseEx<Data>().Of(parseable));
+            var result = data.Where(parseable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());

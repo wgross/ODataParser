@@ -4,7 +4,7 @@ using Xunit;
 
 namespace ODataParser.Test
 {
-    public class WhereClauseExTest
+    public class ODataPredicateExpressionTest
     {
         private class Data
         {
@@ -19,9 +19,9 @@ namespace ODataParser.Test
         [InlineData((float)1.0, "1.0")]
         public void Parse_constant(object result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().Constant.Parse(parsable).Value);
-            Assert.Equal(result, ((ConstantExpression)new WhereClauseEx<Data>().Factor.Parse(parsable)).Value);
-            Assert.Equal(result, ((ConstantExpression)new WhereClauseEx<Data>().Operand.Parse(parsable)).Value);
+            Assert.Equal(result, PredicateExpression.For<Data>().Constant.Parse(parsable).Value);
+            Assert.Equal(result, ((ConstantExpression)PredicateExpression.For<Data>().Factor.Parse(parsable)).Value);
+            Assert.Equal(result, ((ConstantExpression)PredicateExpression.For<Data>().Operand.Parse(parsable)).Value);
         }
 
         [Theory]
@@ -29,8 +29,8 @@ namespace ODataParser.Test
         [InlineData(1, "2.0 mul 0.5")]
         public void Parse_multipicative(int result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().MutiplicativeTerm.CallAsFunc<int>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().AdditiveTerm.CallAsFunc<int>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().MutiplicativeTerm.CallAsFunc<int>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().AdditiveTerm.CallAsFunc<int>(parsable));
         }
 
         [Theory]
@@ -38,7 +38,7 @@ namespace ODataParser.Test
         [InlineData(7, "1 add 2 mul 3")] // mul first
         public void Parse_additive(int result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().AdditiveTerm.CallAsFunc<int>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().AdditiveTerm.CallAsFunc<int>(parsable));
         }
 
         #endregion Expressions resolve to numbers
@@ -50,9 +50,9 @@ namespace ODataParser.Test
         [InlineData("", "''")]
         public void Parse_constant_text(string result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().Constant.Parse(parsable).Value);
-            Assert.Equal(result, ((ConstantExpression)new WhereClauseEx<Data>().Factor.Parse(parsable)).Value);
-            Assert.Equal(result, ((ConstantExpression)new WhereClauseEx<Data>().Operand.Parse(parsable)).Value);
+            Assert.Equal(result, PredicateExpression.For<Data>().Constant.Parse(parsable).Value);
+            Assert.Equal(result, ((ConstantExpression)PredicateExpression.For<Data>().Factor.Parse(parsable)).Value);
+            Assert.Equal(result, ((ConstantExpression)PredicateExpression.For<Data>().Operand.Parse(parsable)).Value);
         }
 
         #endregion Expressions resolve to text
@@ -64,9 +64,9 @@ namespace ODataParser.Test
         [InlineData(false, "false")]
         public void Parse_boolean_constant(bool result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(new Data()));
+            Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         [Theory]
@@ -79,18 +79,18 @@ namespace ODataParser.Test
         [InlineData(false, "false and 7 eq 1 add 2 mul 3")]
         public void Parse_comparative_number(bool result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(new Data()));
+            Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         [Theory]
         [InlineData(true, "'text' ne 'test'")]
         public void Parse_comparative_texts(bool result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(new Data()));
+            Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         [Theory]
@@ -98,9 +98,9 @@ namespace ODataParser.Test
         [InlineData(false, "'test' eq 'TEST'")]
         public void Parse_comparative_string(bool result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(new Data()));
+            Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         [Theory]
@@ -112,8 +112,8 @@ namespace ODataParser.Test
         [InlineData(true, "7 eq 1 add 2 mul 3")]
         public void Parse_boolean(bool result, string parsable)
         {
-            Assert.Equal(result, new WhereClauseEx<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(new Data()));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         [Theory]
@@ -125,7 +125,7 @@ namespace ODataParser.Test
                 Integer = 1
             };
 
-            Assert.Equal(result, new WhereClauseEx<Data>().GetProperty<int>(parsable).Compile().Invoke(data));
+            Assert.Equal(result, PredicateExpression.For<Data>().GetProperty<int>(parsable).Compile().Invoke(data));
         }
 
         [Theory]
@@ -138,7 +138,7 @@ namespace ODataParser.Test
                 Integer = 1
             };
 
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(data));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(data));
         }
 
         [Theory]
@@ -151,7 +151,7 @@ namespace ODataParser.Test
                 String = "begin_end"
             };
 
-            Assert.Equal(result, new WhereClauseEx<Data>().Of(parsable).Compile().Invoke(data));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(data));
         }
 
         #endregion Expressions resolve to bool

@@ -1,5 +1,4 @@
 ﻿using ODataParser.Primitives;
-using Parser;
 using Sprache;
 using System;
 using System.Linq;
@@ -8,9 +7,22 @@ using System.Reflection;
 
 namespace ODataParser
 {
-    public class WhereClauseEx<T>
+    public static class PredicateExpression
     {
-        public WhereClauseEx()
+        public static IQueryable<T> Where<T>(this IQueryable<T> data, string odataFilterExpression)
+        {
+            return data.Where(For<T>().FromODataFilter(odataFilterExpression));
+        }
+
+        public static ODataPredicateExpressionParser<T> For<T>()
+        {
+            return new ODataPredicateExpressionParser<T>();
+        }
+    }
+
+    public class ODataPredicateExpressionParser<T>
+    {
+        public ODataPredicateExpressionParser()
         {
             this.Property = (from name in Parse.Letter.AtLeastOnce().Text()
                              select Expression.Property(this.predicateInputParamater, name)).Named(nameof(Property));
@@ -66,7 +78,7 @@ namespace ODataParser
         /// </summary>
         private readonly ParameterExpression predicateInputParamater = Expression.Parameter(typeof(T));
 
-        public Expression<Func<T, bool>> Of(string whereClause)
+        public Expression<Func<T, bool>> FromODataFilter(string whereClause)
         {
             return Expression.Lambda<Func<T, bool>>(
                 body: this.BooleanTerm.Parse(whereClause),
