@@ -1,4 +1,5 @@
-﻿using Sprache;
+﻿using Parser;
+using Sprache;
 using System;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,16 +11,18 @@ namespace ODataParser
     {
         public WhereClauseEx()
         {
-            this.Property = from name in Parse.Letter.AtLeastOnce().Text()
-                            select Expression.Property(this.predicateInputParamater, name);
+            this.Property = (from name in Parse.Letter.AtLeastOnce().Text()
+                             select Expression.Property(this.predicateInputParamater, name)).Named(nameof(Property));
 
-            this.Function = from name in Parse.Letter.AtLeastOnce().Text()
-                            from lparen in Parse.Char('(')
-                            from expr in Parse.Ref(() => this.BooleanTerm).DelimitedBy(Parse.Char(',').Token())
-                            from rparen in Parse.Char(')')
-                            select CallFunction(name, expr.ToArray());
+            this.Function = (from name in Parse.Letter.AtLeastOnce().Text()
+                             from lparen in Parse.Char('(')
+                             from expr in Parse.Ref(() => this.BooleanTerm).DelimitedBy(Parse.Char(',').Token())
+                             from rparen in Parse.Char(')')
+                             select CallFunction(name, expr.ToArray())).Named(nameof(Function));
 
-            this.Constant = Parse.Decimal.Select(x => Expression.Constant(int.Parse(x))).Named(nameof(Constant));
+            this.Constant = ScalarValues.Number.Named(nameof(Constant));
+            //this.Constant = ScalarValues.Number.XOr(ScalarValues.StringConstant).Named(nameof(Constant));
+            //old//this.Constant = Parse.Decimal.Select(x => Expression.Constant(int.Parse(x))).Named(nameof(Constant));
 
             this.Factor = (from lparen in Parse.Char('(')
                            from expr in Parse.Ref(() => this.BooleanTerm)

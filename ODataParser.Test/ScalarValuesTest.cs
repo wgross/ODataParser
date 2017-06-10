@@ -90,13 +90,10 @@ namespace Parser.Test
         [InlineData(" -.1")]
         [InlineData(" -.1 ")]
         [InlineData("-.1 ")]
-        public void Parse_float_Number_no_number(string parsable)
+        private void Parse_number_fails_on_leading_dot(string parsable)
         {
-            // ACT
-
-            Assert.Equal(float.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<float>(parsable));
-            //ugly rounding//Assert.Equal(double.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<double>(parsable));
-            Assert.Equal(decimal.Parse(parsable, NumberStyles.Number, CultureInfo.InvariantCulture), ScalarValues.Number.CallAsFunc<decimal>(parsable));
+            // ACT & ASSERT
+            Assert.Throws<ParseException>(() => ScalarValues.Number.Parse(parsable));
         }
 
         [Fact]

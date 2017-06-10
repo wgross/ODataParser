@@ -15,18 +15,18 @@ namespace Parser
 
         public static Parser<ConstantExpression> Number = from leading in Parse.Optional(Parse.WhiteSpace)
                                                           from negative in Parse.Optional(Parse.Char('-'))
-                                                          from number in Parse.Optional(Parse.Number)
+                                                          from number in Parse.Number
                                                           from decimals in Parse.Optional(from dot in Parse.Char('.')
                                                                                           from decimals in Parse.Number
                                                                                           select decimals)
                                                           from trailing in Parse.Optional(Parse.WhiteSpace)
                                                           select SignedNumberExpression(negative, number, decimals);
 
-        private static ConstantExpression SignedNumberExpression(IOption<char> negative, IOption<string> number, IOption<string> decimals)
+        private static ConstantExpression SignedNumberExpression(IOption<char> negative, string number, IOption<string> decimals)
         {
             if (decimals.IsDefined)
             {
-                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number.IsDefined ? number.Get() : "0")}.{decimals.Get()}";
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number)}.{decimals.Get()}";
                 if (float.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var floatvalue))
                     return Expression.Constant(floatvalue);
                 else if (double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var doublevalue))
@@ -35,7 +35,7 @@ namespace Parser
             }
             else
             {
-                var str = negative.IsDefined ? "-" + number.Get() : number.Get();
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{number}";
                 if (int.TryParse(str, out var intValue))
                     return Expression.Constant(intValue);
                 else if (long.TryParse(str, out var longValue))
