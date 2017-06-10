@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test
 {
     public class StringFunctionsTest
     {
@@ -25,7 +25,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(parseable));
+            var result = data.Where(parseable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -44,7 +44,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(parseable));
+            var result = data.Where(parseable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());

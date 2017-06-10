@@ -2,10 +2,20 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <Version>0.0.1</Version>
+    <Description>Simple parser of a subset of OData filter expressions.</Description>
+    <RepositoryUrl>https://github.com/wgross/ODataParser</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageProjectUrl>https://github.com/wgross/ODataParser</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/wgross/ODataParser/blob/master/LICENSE</PackageLicenseUrl>
+    <Copyright>Wolfgang Gross</Copyright>
+    <PackageTags>odata parser linq query</PackageTags>
+    <Authors>wgross@github.com</Authors>
+    <Company />
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sprache" Version="2.1.0" />
+    <ProjectReference Include="..\Sprache\src\Sprache\Sprache.csproj" />
   </ItemGroup>
 
 </Project>
