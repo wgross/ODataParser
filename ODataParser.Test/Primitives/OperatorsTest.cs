@@ -1,8 +1,9 @@
-﻿using Sprache;
+﻿using ODataParser;
+using Sprache;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test
 {
     public class OperatorsTest
     {
@@ -70,6 +71,65 @@ namespace Parser.Test
         {
             Assert.Equal(ExpressionType.GreaterThan, Operators.GreaterThan.Parse(parsable));
             Assert.Equal(ExpressionType.GreaterThan, Operators.ComparisionOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("add")]
+        [InlineData(" add")]
+        [InlineData(" add ")]
+        [InlineData("add ")]
+        public void Parse_add(string parsable)
+        {
+            Assert.Equal(ExpressionType.Add, Operators.Add.Parse(parsable));
+            Assert.Equal(ExpressionType.Add, Operators.ArithmeticOperators.Parse(parsable));
+            Assert.Equal(ExpressionType.Add, Operators.AditiveArithmeticOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("sub")]
+        [InlineData(" sub")]
+        [InlineData(" sub ")]
+        [InlineData("sub ")]
+        public void Parse_sub(string parsable)
+        {
+            Assert.Equal(ExpressionType.Subtract, Operators.Sub.Parse(parsable));
+            Assert.Equal(ExpressionType.Subtract, Operators.ArithmeticOperators.Parse(parsable));
+            Assert.Equal(ExpressionType.Subtract, Operators.AditiveArithmeticOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("mul")]
+        [InlineData(" mul")]
+        [InlineData(" mul ")]
+        [InlineData("mul ")]
+        public void Parse_mul(string parsable)
+        {
+            Assert.Equal(ExpressionType.Multiply, Operators.Mul.Parse(parsable));
+            Assert.Equal(ExpressionType.Multiply, Operators.ArithmeticOperators.Parse(parsable));
+            Assert.Equal(ExpressionType.Multiply, Operators.MultiplicativeArithmeticOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("div")]
+        [InlineData(" div")]
+        [InlineData(" div ")]
+        [InlineData("div ")]
+        public void Parse_div(string parsable)
+        {
+            Assert.Equal(ExpressionType.Divide, Operators.Div.Parse(parsable));
+            Assert.Equal(ExpressionType.Divide, Operators.ArithmeticOperators.Parse(parsable));
+            Assert.Equal(ExpressionType.Divide, Operators.MultiplicativeArithmeticOperators.Parse(parsable));
+        }
+
+        [Theory]
+        [InlineData("pow")]
+        [InlineData(" pow")]
+        [InlineData(" pow ")]
+        [InlineData("pow ")]
+        public void Parse_pow(string parsable)
+        {
+            Assert.Equal(ExpressionType.Power, Operators.Pow.Parse(parsable));
+            Assert.Equal(ExpressionType.Power, Operators.ArithmeticOperators.Parse(parsable));
         }
 
         [Theory]

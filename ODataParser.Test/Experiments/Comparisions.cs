@@ -1,9 +1,8 @@
-﻿using Parser;
+﻿using ODataParser.Primitives;
 using Sprache;
-using System;
 using System.Linq.Expressions;
 
-namespace ODataParser.Test
+namespace ODataParser.Test.Experiments
 {
     public class Comparisions
     {
@@ -43,17 +42,5 @@ namespace ODataParser.Test
         public static Parser<Expression> Complete => Parse.ChainOperator(Operators.ComparisionOperators, AnyComparisionExpression, Expression.MakeBinary).End();
 
         #endregion Parses a text to the end as a chained set of comparision expressions
-    }
-
-    public static class ExpressionParserExtensions
-    {
-        public static T CallAsFunc<T>(this Parser<Expression> expressionParser, string text)
-        {
-            return ((Expression<Func<T>>)(expressionParser
-                .Select(body => Expression.Lambda<Func<T>>(body))
-                .Parse(text)))
-                    .Compile()
-                    .Invoke();
-        }
     }
 }

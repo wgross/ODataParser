@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test
 {
     public class MultiplePropertyComparisionTest
     {
@@ -40,7 +40,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(parsable));
+            var result = data.Where(parsable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -68,7 +68,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(parsable));
+            var result = data.Where(parsable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -93,7 +93,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(parsable));
+            var result = data.Where(parsable);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());

@@ -1,7 +1,8 @@
 ﻿using Sprache;
+using System.Globalization;
 using System.Linq.Expressions;
 
-namespace Parser
+namespace ODataParser.Primitives
 {
     /// <summary>
     /// Parser for scalar values OData understands
@@ -14,19 +15,38 @@ namespace Parser
 
         public static Parser<ConstantExpression> Number = from leading in Parse.Optional(Parse.WhiteSpace)
                                                           from negative in Parse.Optional(Parse.Char('-'))
-                                                          from number in Parse.Decimal.Token()
+                                                          from number in Parse.Number
+                                                          from decimals in Parse.Optional(from dot in Parse.Char('.')
+                                                                                          from decimals in Parse.Number
+                                                                                          select decimals)
                                                           from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                          select SignedNumberExpression(negative, number);
+                                                          select SignedNumberExpression(negative, number, decimals);
 
-        private static ConstantExpression SignedNumberExpression(IOption<char> negative, string signedNumber)
+        private static ConstantExpression SignedNumberExpression(IOption<char> negative, string number, IOption<string> decimals)
         {
-            if (negative.IsDefined)
-                return Expression.Constant(int.Parse("-" + signedNumber));
+            if (decimals.IsDefined)
+            {
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{(number)}.{decimals.Get()}";
+                if (float.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var floatvalue))
+                    return Expression.Constant(floatvalue);
+                else if (double.TryParse(str, NumberStyles.Number, CultureInfo.InvariantCulture, out var doublevalue))
+                    return Expression.Constant(doublevalue);
+                return Expression.Constant(decimal.Parse(str, NumberStyles.Number, CultureInfo.InvariantCulture));
+            }
             else
-                return Expression.Constant(int.Parse(signedNumber));
+            {
+                var str = $"{(negative.IsDefined ? "-" : string.Empty)}{number}";
+                if (int.TryParse(str, out var intValue))
+                    return Expression.Constant(intValue);
+                else if (long.TryParse(str, out var longValue))
+                    return Expression.Constant(longValue);
+                else return Expression.Constant(decimal.Parse(str));
+            }
         }
 
         #endregion Parse JSONish number
+
+        #region Parse string constants: '<text>'
 
         /// <summary>
         /// A string contant is surreounded by ticke ('). Leading and trailing spaces are ignored outside of teh ticked area.
@@ -35,6 +55,8 @@ namespace Parser
                                                                             from stringContent in Parse.CharExcept('\'').Many().Text()
                                                                             from closingTick in Parse.Char('\'')
                                                                             select Expression.Constant(stringContent)).Token();
+
+        #endregion Parse string constants: '<text>'
 
         #region Parse boolean constants: <boolean constant> ::= <true|false>
 

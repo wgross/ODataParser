@@ -1,9 +1,8 @@
-﻿using Sprache;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test
 {
     public class SinglePropertyComparisonTest
     {
@@ -23,7 +22,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of("Integer eq 2"));
+            var result = data.Where("Integer eq 2");
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -38,7 +37,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of("String eq 'test'"));
+            var result = data.Where("String eq 'test'");
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -53,7 +52,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of("Boolean eq true"));
+            var result = data.Where("Boolean eq true");
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
@@ -73,7 +72,7 @@ namespace Parser.Test
             }.AsQueryable();
 
             // ACT
-            var result = data.Where(new WhereClause<Data>().Of(toParse));
+            var result = data.Where(toParse);
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
