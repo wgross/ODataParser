@@ -1,10 +1,10 @@
-using ODataParser.Test;
+using ODataParser.Primitives;
 using Sprache;
 using System;
 using System.Globalization;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test.Primitives
 {
     public class ScalerValuesTest
     {

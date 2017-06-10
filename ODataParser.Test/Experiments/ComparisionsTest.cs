@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace ODataParser.Test
+namespace ODataParser.Test.Experiments
 {
     public class ComparisionsTest
     {

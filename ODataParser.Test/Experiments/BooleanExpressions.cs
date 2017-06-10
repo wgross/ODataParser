@@ -1,8 +1,9 @@
-﻿using Parser;
+﻿using ODataParser.Primitives;
+using Parser;
 using Sprache;
 using System.Linq.Expressions;
 
-namespace ODataParser.Test
+namespace ODataParser.Test.Experiments
 {
     public class BooleanExpressions
     {

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Linq.Expressions;
 
-namespace Parser
+namespace ODataParser.Primitives
 {
     /// <summary>
     /// Parser for scalar values OData understands

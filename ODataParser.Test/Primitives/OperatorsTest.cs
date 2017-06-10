@@ -3,7 +3,7 @@ using Sprache;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace Parser.Test
+namespace ODataParser.Test
 {
     public class OperatorsTest
     {

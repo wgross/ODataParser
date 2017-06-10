@@ -1,9 +1,9 @@
-﻿using Parser;
+﻿using ODataParser.Primitives;
 using Sprache;
 using System;
 using System.Linq.Expressions;
 
-namespace ODataParser.Test
+namespace ODataParser.Test.Experiments
 {
     public class ValuePredicates
     {
