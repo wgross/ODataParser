@@ -162,6 +162,20 @@ namespace ODataParser.Test.Primitives
 
         #endregion Number
 
+        #region DateTime
+
+        [Theory]
+        [InlineData("2017-06-16T18:43:07.733+02:00")]
+        [InlineData("2017-06-16T18:43:07.733-02:00")]
+        [InlineData("2017-06-16T18:43:07.733Z")]
+        [InlineData("2017-06-16T18:43:07Z")]
+        public void Parse_datetime(string parsable)
+        {
+            Assert.Equal(DateTimeOffset.Parse(parsable), ScalarValues.DateTime.CallAsFunc<DateTimeOffset>(parsable));
+        }
+
+        #endregion DateTime
+
         #region BooleanConstant,BooleanConstantInParenthesis,AnyBooleanConstant
 
         [Theory]
