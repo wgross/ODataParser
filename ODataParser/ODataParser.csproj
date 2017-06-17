@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netstandard1.5</TargetFramework>
     <Version>0.0.1</Version>
     <Description>Simple parser of a subset of OData filter expressions.</Description>
     <RepositoryUrl>https://github.com/wgross/ODataParser</RepositoryUrl>
@@ -15,7 +15,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Sprache\src\Sprache\Sprache.csproj" />
+    <PackageReference Include="Sprache" Version="2.1.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="System.Linq.Queryable" Version="4.3.0" />
   </ItemGroup>
 
 </Project>

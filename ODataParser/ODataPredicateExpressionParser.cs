@@ -58,9 +58,9 @@ namespace ODataParser
         private static Expression CallFunction(string name, Expression[] parameters)
         {
             if (name == "startswith")
-                return Expression.Call(parameters[0], typeof(string).GetMethod(nameof(string.StartsWith), new[] { typeof(string) }), parameters[1]);
+                return Expression.Call(parameters[0], typeof(string).GetTypeInfo().GetMethod(nameof(string.StartsWith), new[] { typeof(string) }), parameters[1]);
             else if (name == "endswith")
-                return Expression.Call(parameters[0], typeof(string).GetMethod(nameof(string.EndsWith), new[] { typeof(string) }), parameters[1]);
+                return Expression.Call(parameters[0], typeof(string).GetTypeInfo().GetMethod(nameof(string.EndsWith), new[] { typeof(string) }), parameters[1]);
             //return Expression.Call(typeof(string).GetMethod(nameof(string.EndsWith), parameters.Select(e => e.Type).ToArray()));
             throw new ParseException(string.Format("Function '{0}({1})' does not exist.", name, string.Join(",", parameters.Select(e => e.Type.Name))));
         }
