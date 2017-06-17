@@ -49,7 +49,7 @@ namespace ODataParser.Primitives
 
         #endregion Parse JSONish number
 
-        #region Parse Dates and times
+        #region Parse Dates and times from ISO 8601 formatted strings
 
         public static Parser<ConstantExpression> DateTimeOffset => from leading in Parse.Optional(Parse.WhiteSpace)
                                                                    from dateTime in ScalarValues.DateTime
@@ -73,19 +73,19 @@ namespace ODataParser.Primitives
                                                        second: time.ElementAt(2),
                                                        millisecond: msec.GetOrElse(0));
 
-        private static Parser<IEnumerable<int>> Date = Parse.DelimitedBy(parser: Parse.Number.Select(txt => int.Parse(txt)), delimiter: Parse.Char('-'));
+        private static Parser<IEnumerable<int>> Date = Parse.DelimitedBy(parser: (from n in Parse.Number select int.Parse(n)), delimiter: Parse.Char('-'));
 
-        private static Parser<IEnumerable<int>> Time = Parse.DelimitedBy(parser: Parse.Number.Select(txt => int.Parse(txt)), delimiter: Parse.Char(':'));
+        private static Parser<IEnumerable<int>> Time = Parse.DelimitedBy(parser: (from n in Parse.Number select int.Parse(n)), delimiter: Parse.Char(':'));
 
         private static Parser<TimeSpan> TimezoneOffset = from tzSep in Parse.Chars('+', '-', 'Z')
-                                                         from hourOffset in Parse.Number.Select(str => int.Parse(str))
+                                                         from hourOffset in (from n in Parse.Number select int.Parse(n))
                                                          from offsetSep in Parse.Char(':')
-                                                         from minOffset in Parse.Number.Select(str => int.Parse(str))
+                                                         from minOffset in (from n in Parse.Number select int.Parse(n))
                                                          select tzSep == '+'
                                                          ? new TimeSpan(hourOffset, minOffset, seconds: 0)
                                                          : TimeSpan.Zero.Subtract(new TimeSpan(hourOffset, minOffset, seconds: 0));
 
-        #endregion Parse Dates and times
+        #endregion Parse Dates and times from ISO 8601 formatted strings
 
         #region Parse string constants: '<text>'
 
@@ -122,10 +122,5 @@ namespace ODataParser.Primitives
         public static Parser<ConstantExpression> AnyBooleanConstant => BooleanConstant.XOr(BooleanConstantInParenthesis).Token(); // must be XOR
 
         #endregion Parse boolean constants: <boolean constant> ::= <true|false>
-
-        /// <summary>
-        /// All Scalar value packed together for convenience
-        /// </summary>
-        public static Parser<Expression> All = Number.Or(StringConstant).Or(AnyBooleanConstant);
     }
 }
