@@ -34,7 +34,7 @@ namespace ODataParser
                              select CallFunction(name, expr.ToArray())).Named(nameof(Function));
 
             this.Constant = Parse
-                .Or(ScalarValues.DateTime, ScalarValues.Number) // parse Datetime before number. Number would take the year as an int which would make the dash to a minus.
+                .Or(ScalarValues.DateTimeOffset, ScalarValues.Number) // parse Datetime before number. Number would take the year as an int which would make the dash to a minus.
                 .XOr(ScalarValues.StringConstant)
                 .XOr(ScalarValues.BooleanConstant)
                 .Named(nameof(Constant));

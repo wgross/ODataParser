@@ -1,6 +1,8 @@
 ﻿using Sprache;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Linq.Expressions;
 
 namespace ODataParser.Primitives
@@ -47,35 +49,43 @@ namespace ODataParser.Primitives
 
         #endregion Parse JSONish number
 
-        public static Parser<ConstantExpression> DateTime => from leading in Parse.Optional(Parse.WhiteSpace)
-                                                             from year in Parse.Number
-                                                             from d1 in Parse.Char('-')
-                                                             from month in Parse.Number
-                                                             from d2 in Parse.Char('-')
-                                                             from day in Parse.Number
-                                                             from T in Parse.Char('T')
-                                                             from hour in Parse.Number
-                                                             from c1 in Parse.Char(':')
-                                                             from min in Parse.Number
-                                                             from c2 in Parse.Char(':')
-                                                             from sec in Parse.Number
-                                                             from msec in Parse.Optional(from dot in Parse.Char('.')
-                                                                                         from msec in Parse.Number
-                                                                                         select int.Parse(msec))
-                                                             from tzSep in Parse.Chars('+', '-', 'Z')
-                                                             from offset in Parse.Optional(from hourOffset in Parse.Number
-                                                                                           from offsetSep in Parse.Char(':')
-                                                                                           from minOffset in Parse.Number
-                                                                                           select tzSep == '+'
-                                                                                           ? new TimeSpan(int.Parse(hourOffset), int.Parse(minOffset), seconds: 0)
-                                                                                           : TimeSpan.Zero.Subtract(new TimeSpan(int.Parse(hourOffset), int.Parse(minOffset), seconds: 0)))
-                                                             from trailing in Parse.Optional(Parse.WhiteSpace)
-                                                             select DateTimeOffsetExpression(year, month, day, hour, min, sec, msec, tzSep, offset);
+        #region Parse Dates and times
 
-        private static ConstantExpression DateTimeOffsetExpression(string year, string month, string day, string hour, string min, string sec, IOption<int> msec, char tzSep, IOption<TimeSpan> offset)
-        {
-            return Expression.Constant(new DateTimeOffset(int.Parse(year), int.Parse(month), int.Parse(day), int.Parse(hour), int.Parse(min), int.Parse(sec), msec.GetOrElse(0), offset.GetOrElse(TimeSpan.Zero)));
-        }
+        public static Parser<ConstantExpression> DateTimeOffset => from leading in Parse.Optional(Parse.WhiteSpace)
+                                                                   from dateTime in ScalarValues.DateTime
+                                                                   from offset in Parse.Optional(ScalarValues.TimezoneOffset)
+                                                                   from trailing in Parse.Optional(Parse.WhiteSpace)
+                                                                   select Expression.Constant(new DateTimeOffset(dateTime, offset.GetOrElse(TimeSpan.Zero)));
+
+        private static Parser<DateTime> DateTime = from leading in Parse.Optional(Parse.WhiteSpace)
+                                                   from date in ScalarValues.Date
+                                                   from T in Parse.Char('T')
+                                                   from time in ScalarValues.Time
+                                                   from msec in Parse.Optional(from dot in Parse.Char('.')
+                                                                               from msec in Parse.Number
+                                                                               select int.Parse(msec))
+                                                   select new DateTime(
+                                                       year: date.ElementAt(0),
+                                                       month: date.ElementAt(1),
+                                                       day: date.ElementAt(2),
+                                                       hour: time.ElementAt(0),
+                                                       minute: time.ElementAt(1),
+                                                       second: time.ElementAt(2),
+                                                       millisecond: msec.GetOrElse(0));
+
+        private static Parser<IEnumerable<int>> Date = Parse.DelimitedBy(parser: Parse.Number.Select(txt => int.Parse(txt)), delimiter: Parse.Char('-'));
+
+        private static Parser<IEnumerable<int>> Time = Parse.DelimitedBy(parser: Parse.Number.Select(txt => int.Parse(txt)), delimiter: Parse.Char(':'));
+
+        private static Parser<TimeSpan> TimezoneOffset = from tzSep in Parse.Chars('+', '-', 'Z')
+                                                         from hourOffset in Parse.Number.Select(str => int.Parse(str))
+                                                         from offsetSep in Parse.Char(':')
+                                                         from minOffset in Parse.Number.Select(str => int.Parse(str))
+                                                         select tzSep == '+'
+                                                         ? new TimeSpan(hourOffset, minOffset, seconds: 0)
+                                                         : TimeSpan.Zero.Subtract(new TimeSpan(hourOffset, minOffset, seconds: 0));
+
+        #endregion Parse Dates and times
 
         #region Parse string constants: '<text>'
 
