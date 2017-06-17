@@ -49,7 +49,7 @@ namespace ODataParser.Primitives
 
         #endregion Parse JSONish number
 
-        #region Parse Dates and times
+        #region Parse Dates and times from ISO 8601 formatted strings
 
         public static Parser<ConstantExpression> DateTimeOffset => from leading in Parse.Optional(Parse.WhiteSpace)
                                                                    from dateTime in ScalarValues.DateTime
@@ -85,7 +85,7 @@ namespace ODataParser.Primitives
                                                          ? new TimeSpan(hourOffset, minOffset, seconds: 0)
                                                          : TimeSpan.Zero.Subtract(new TimeSpan(hourOffset, minOffset, seconds: 0));
 
-        #endregion Parse Dates and times
+        #endregion Parse Dates and times from ISO 8601 formatted strings
 
         #region Parse string constants: '<text>'
 
@@ -122,10 +122,5 @@ namespace ODataParser.Primitives
         public static Parser<ConstantExpression> AnyBooleanConstant => BooleanConstant.XOr(BooleanConstantInParenthesis).Token(); // must be XOR
 
         #endregion Parse boolean constants: <boolean constant> ::= <true|false>
-
-        /// <summary>
-        /// All Scalar value packed together for convenience
-        /// </summary>
-        public static Parser<Expression> All = Number.Or(StringConstant).Or(AnyBooleanConstant);
     }
 }
