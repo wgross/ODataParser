@@ -69,7 +69,6 @@ namespace ODataParser.Primitives
                                                                                            select tzSep == '+'
                                                                                            ? new TimeSpan(int.Parse(hourOffset), int.Parse(minOffset), seconds: 0)
                                                                                            : TimeSpan.Zero.Subtract(new TimeSpan(int.Parse(hourOffset), int.Parse(minOffset), seconds: 0)))
-
                                                              from trailing in Parse.Optional(Parse.WhiteSpace)
                                                              select DateTimeOffsetExpression(year, month, day, hour, min, sec, msec, tzSep, offset);
 

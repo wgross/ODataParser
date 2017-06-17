@@ -77,7 +77,7 @@ namespace ODataParser.Test
         [InlineData(true, "7 eq 1 add 2 mul 3")]
         [InlineData(true, "true and 7 eq 1 add 2 mul 3")]
         [InlineData(false, "false and 7 eq 1 add 2 mul 3")]
-        public void Parse_comparative_number(bool result, string parsable)
+        public void Parse_number_comparison(bool result, string parsable)
         {
             Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
             Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
@@ -96,7 +96,7 @@ namespace ODataParser.Test
         [Theory]
         [InlineData(true, "'test' eq 'test'")]
         [InlineData(false, "'test' eq 'TEST'")]
-        public void Parse_comparative_string(bool result, string parsable)
+        public void Parse_string_comparision(bool result, string parsable)
         {
             Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
             Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
@@ -152,6 +152,15 @@ namespace ODataParser.Test
             };
 
             Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(data));
+        }
+
+        [Theory]
+        [InlineData(true, "2017-06-16T18:43:07.733+02:00 eq 2017-06-16T18:43:07.733+02:00")]
+        [InlineData(false, "2017-06-16T18:43:07.733+02:00 ne 2017-06-16T18:43:07.733+02:00")]
+        [InlineData(true, "2017-06-16T18:43:00+02:00 lt 2017-06-16T18:43:07.733+02:00")]
+        public void Parse_datetime_comparison(bool result, string parsable)
+        {
+            Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
         }
 
         #endregion Expressions resolve to bool

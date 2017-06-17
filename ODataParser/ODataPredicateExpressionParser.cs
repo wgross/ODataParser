@@ -33,7 +33,11 @@ namespace ODataParser
                              from rparen in Parse.Char(')')
                              select CallFunction(name, expr.ToArray())).Named(nameof(Function));
 
-            this.Constant = ScalarValues.Number.XOr(ScalarValues.StringConstant).XOr(ScalarValues.BooleanConstant).Named(nameof(Constant));
+            this.Constant = Parse
+                .Or(ScalarValues.DateTime, ScalarValues.Number) // parse Datetime before number. Number would take the year as an int which would make the dash to a minus.
+                .XOr(ScalarValues.StringConstant)
+                .XOr(ScalarValues.BooleanConstant)
+                .Named(nameof(Constant));
 
             this.Factor = (from lparen in Parse.Char('(')
                            from expr in Parse.Ref(() => this.BooleanTerm)
