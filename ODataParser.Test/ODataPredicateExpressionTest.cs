@@ -161,6 +161,8 @@ namespace ODataParser.Test
         public void Parse_datetime_comparison(bool result, string parsable)
         {
             Assert.Equal(result, PredicateExpression.For<Data>().ComparativeTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().BooleanTerm.CallAsFunc<bool>(parsable));
+            Assert.Equal(result, PredicateExpression.For<Data>().FromODataFilter(parsable).Compile().Invoke(new Data()));
         }
 
         #endregion Expressions resolve to bool

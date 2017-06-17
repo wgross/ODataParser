@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 
@@ -11,6 +12,7 @@ namespace ODataParser.Test
             public int Integer { get; set; }
             public string String { get; set; }
             public bool Boolean { get; set; }
+            public DateTimeOffset DateTime { get; set; }
         }
 
         [Fact]
@@ -23,6 +25,22 @@ namespace ODataParser.Test
 
             // ACT
             var result = data.Where("Integer eq 2");
+
+            // ASSERT
+            Assert.Same(data.ElementAt(0), result.Single());
+        }
+
+        [Fact]
+        public void Filter_eq_DateTime()
+        {
+            // ARRANGE
+            var now = DateTimeOffset.Parse("2017-06-16T18:43:07.733+02:00");
+            var data = new List<Data> {
+                new Data{ DateTime = now }
+            }.AsQueryable();
+
+            // ACT
+            var result = data.Where($"DateTime eq 2017-06-16T18:43:07.733+02:00");
 
             // ASSERT
             Assert.Same(data.ElementAt(0), result.Single());
